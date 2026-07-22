@@ -202,12 +202,62 @@
 
   #skillpoint-display{
     font-family:'Cinzel', serif;
+    font-weight:700;
     font-size:clamp(14px,2.6vw,17px);
-    color:var(--gold);
-    display:flex; align-items:center; gap:6px;
-    text-shadow:0 1px 3px rgba(0,0,0,0.8);
+    color:#1A1A1A;
+    display:flex; align-items:center; gap:8px;
+    appearance:none; border:2px solid var(--gold-bright);
+    border-radius:22px;
+    padding:8px 20px;
+    background:linear-gradient(180deg, var(--gold-bright), var(--orange));
+    box-shadow:0 0 16px rgba(240,201,122,0.6), 0 4px 10px rgba(0,0,0,0.4);
+    cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease;
+    animation:spPulse 2.4s ease-in-out infinite;
   }
-  #skillpoint-display .sp-icon{ filter:drop-shadow(0 0 4px rgba(240,201,122,0.7)); }
+  #skillpoint-display:hover{
+    transform:translateY(-2px) scale(1.03);
+    box-shadow:0 0 24px rgba(240,201,122,0.85), 0 6px 14px rgba(0,0,0,0.5);
+  }
+  #skillpoint-display:active{ transform:translateY(0) scale(0.97); }
+  @keyframes spPulse{
+    0%,100%{ box-shadow:0 0 16px rgba(240,201,122,0.6), 0 4px 10px rgba(0,0,0,0.4); }
+    50%{ box-shadow:0 0 26px rgba(240,201,122,0.9), 0 4px 10px rgba(0,0,0,0.4); }
+  }
+  #skillpoint-display .sp-icon{ font-size:1.1em; filter:drop-shadow(0 0 4px rgba(255,255,255,0.6)); }
+
+  #energy-bar-wrap{
+    width:min(560px, 92vw);
+    height:20px;
+    background:rgba(13,24,38,0.75);
+    border:2px solid #2f9bc9;
+    border-radius:11px;
+    overflow:hidden;
+    position:relative;
+    box-shadow:0 0 12px rgba(0,0,0,0.5), inset 0 0 8px rgba(0,0,0,0.6);
+  }
+  #energy-bar-fill{
+    height:100%;
+    width:100%;
+    background:linear-gradient(90deg, #145a7a, #2f9bc9, #9be8f5);
+    background-size:200% 100%;
+    transition:width .35s cubic-bezier(.4,1.4,.6,1), background .3s ease;
+    box-shadow:0 0 10px rgba(90,200,230,0.6);
+  }
+  #energy-bar-fill.low{
+    background:linear-gradient(90deg, #7a1414, #c92f2f, #f59b9b);
+    box-shadow:0 0 10px rgba(230,90,90,0.6);
+  }
+  #energy-bar-text{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Cinzel', serif;
+    font-size:11.5px;
+    font-weight:600;
+    color:#eaf7fb;
+    text-shadow:0 1px 3px rgba(0,0,0,0.9);
+    letter-spacing:1px;
+  }
 
   /* ---------- CENTER CHARACTER ---------- */
   #char-stage{
@@ -295,6 +345,16 @@
     100%{ transform:scale(1); }
   }
 
+  #char-wrap.denied #char-img,
+  #char-wrap.denied #char-fallback{
+    animation:denyShake .3s ease;
+  }
+  @keyframes denyShake{
+    0%,100%{ transform:translateX(0); }
+    25%{ transform:translateX(-6px); }
+    75%{ transform:translateX(6px); }
+  }
+
   /* floating +XP text */
   .float-xp{
     position:fixed;
@@ -306,6 +366,11 @@
     text-shadow:0 0 8px rgba(240,201,122,0.9), 0 2px 2px rgba(0,0,0,0.8);
     pointer-events:none;
     animation:floatUp 0.9s ease-out forwards;
+  }
+  .float-xp.no-energy{
+    color:#ff8a8a;
+    text-shadow:0 0 8px rgba(255,90,90,0.9), 0 2px 2px rgba(0,0,0,0.8);
+    font-size:16px;
   }
   @keyframes floatUp{
     0%{ transform:translate(-50%,-50%) scale(0.8); opacity:1; }
@@ -393,27 +458,31 @@
   #stats-panel .stat-row{ display:flex; justify-content:space-between; gap:14px; }
   #stats-panel .stat-row span:last-child{ color:var(--gold-bright); font-weight:600; }
 
-  /* ---------- UPGRADES PANEL ---------- */
-  #upgrades-panel{
-    position:fixed;
-    right:16px; bottom:88px;
-    z-index:20;
-    background:rgba(13,24,38,0.72);
-    border:2px solid var(--gold);
-    border-radius:12px;
-    padding:12px 14px;
-    width:min(240px, 42vw);
-    box-shadow:0 4px 18px rgba(0,0,0,0.5);
+  /* ---------- BASE UPGRADES (now on the Skill Tree page) ---------- */
+  #base-upgrades-panel{
+    max-width:980px;
+    margin:0 auto 20px;
+    background:rgba(13,24,38,0.55);
+    border:1.5px solid rgba(212,165,116,0.4);
+    border-radius:14px;
+    padding:14px 16px;
   }
-  #upgrades-panel h3{
-    margin:0 0 8px;
+  #base-upgrades-panel h3{
+    margin:0 0 10px;
+    text-align:center;
     font-family:'Cinzel', serif;
     font-size:14px;
     color:var(--gold-bright);
     letter-spacing:1px;
     border-bottom:1px solid rgba(212,165,116,0.4);
-    padding-bottom:4px;
+    padding-bottom:6px;
   }
+  #base-upgrades-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:12px;
+  }
+  @media (max-width:640px){ #base-upgrades-grid{ grid-template-columns:1fr; } }
   .upgrade-btn{
     width:100%;
     display:flex; flex-direction:column;
@@ -421,14 +490,12 @@
     border:1.5px solid var(--gold);
     border-radius:8px;
     padding:7px 10px;
-    margin-bottom:8px;
     color:#f5e6c8;
     font-family:'Cormorant Garamond', serif;
     cursor:pointer;
     text-align:left;
     transition:transform .12s ease, box-shadow .12s ease, background .2s ease;
   }
-  .upgrade-btn:last-child{ margin-bottom:0; }
   .upgrade-btn:hover:not(:disabled){
     transform:translateY(-2px);
     box-shadow:0 4px 14px rgba(240,201,122,0.35);
@@ -510,10 +577,211 @@
     40%,60%{ transform:translate3d(8px,0,0); }
   }
 
+  /* ---------- TOASTS ---------- */
+  #toast-stack{
+    position:fixed; top:80px; left:50%;
+    transform:translateX(-50%);
+    z-index:70;
+    display:flex; flex-direction:column; gap:8px; align-items:center;
+    pointer-events:none;
+  }
+  .toast{
+    background:rgba(13,24,38,0.94);
+    border:1.5px solid var(--gold-bright);
+    border-radius:10px;
+    padding:8px 16px;
+    font-family:'Cinzel', serif;
+    font-size:13px;
+    color:var(--gold-bright);
+    box-shadow:0 4px 14px rgba(0,0,0,0.5);
+    white-space:nowrap;
+    opacity:0;
+    animation:toastIn .3s ease forwards, toastOut .4s ease 2.3s forwards;
+  }
+  @keyframes toastIn{ from{ opacity:0; transform:translateY(-10px);} to{ opacity:1; transform:translateY(0);} }
+  @keyframes toastOut{ from{ opacity:1;} to{ opacity:0; transform:translateY(-6px);} }
+
+  /* ---------- PERK RANK-UNLOCK CELEBRATION ---------- */
+  #perk-rank-banner{
+    position:fixed; top:34%; left:50%;
+    transform:translate(-50%,-50%) scale(0.4);
+    z-index:65;
+    max-width:min(560px, 88vw);
+    padding:16px 22px;
+    background:rgba(13,24,38,0.94);
+    border:2px solid var(--gold-bright);
+    border-radius:16px;
+    font-family:'Cinzel', serif;
+    font-weight:700;
+    font-size:clamp(15px,2.6vw,20px);
+    color:var(--gold-bright);
+    text-align:center;
+    text-shadow:0 0 10px rgba(240,201,122,0.7);
+    box-shadow:0 0 30px rgba(240,201,122,0.5);
+    opacity:0;
+    pointer-events:none;
+  }
+  #perk-rank-banner.show{ animation:levelUpPop 2.4s cubic-bezier(.2,1.6,.4,1) forwards; }
+
+  /* ---------- PERK TREE PAGE ---------- */
+  #perk-scroll-area{
+    position:fixed; top:78px; left:0; right:0; bottom:78px;
+    overflow-y:auto; overflow-x:hidden;
+    z-index:18;
+    padding:6px clamp(10px,3vw,40px) 20px;
+  }
+  #perk-currency-bar{
+    display:flex; flex-wrap:wrap; justify-content:center; gap:12px;
+    max-width:980px; margin:0 auto 16px;
+    font-family:'Cinzel', serif; font-size:13.5px; color:var(--gold-bright);
+  }
+  #perk-currency-bar span{
+    background:rgba(13,24,38,0.7);
+    border:1.5px solid var(--gold);
+    border-radius:20px;
+    padding:6px 14px;
+    text-shadow:0 1px 3px rgba(0,0,0,0.8);
+  }
+
+  #perk-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:14px;
+    max-width:980px;
+    margin:0 auto;
+  }
+  @media (max-width:820px){ #perk-grid{ grid-template-columns:repeat(2, 1fr); } }
+  @media (max-width:520px){ #perk-grid{ grid-template-columns:1fr; } }
+
+  .perk-card{
+    position:relative;
+    background:linear-gradient(160deg, rgba(42,69,104,0.85), rgba(13,24,38,0.9));
+    border:2px solid var(--gold);
+    border-radius:14px;
+    padding:14px 14px 12px;
+    box-shadow:0 4px 16px rgba(0,0,0,0.45), inset 0 0 20px rgba(212,165,116,0.08);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .perk-card::after{
+    content:'𓂀';
+    position:absolute; top:6px; right:10px;
+    font-size:13px;
+    color:rgba(212,165,116,0.35);
+  }
+  .perk-card:hover{ transform:translateY(-3px); box-shadow:0 8px 22px rgba(240,201,122,0.25); }
+  .perk-card.maxed{
+    border-color:var(--gold-bright);
+    box-shadow:0 0 18px rgba(240,201,122,0.5), inset 0 0 20px rgba(240,201,122,0.12);
+  }
+  .perk-card.perk-buy-flash{ animation:perkBuyFlash .5s ease; }
+  @keyframes perkBuyFlash{
+    0%{ box-shadow:0 0 0 rgba(240,201,122,0); }
+    40%{ box-shadow:0 0 34px rgba(240,201,122,0.95); }
+    100%{ box-shadow:0 4px 16px rgba(0,0,0,0.45); }
+  }
+
+  .perk-category-tag{
+    font-size:9.5px;
+    letter-spacing:.5px;
+    text-transform:uppercase;
+    color:rgba(240,201,122,0.7);
+    margin-bottom:6px;
+  }
+  .perk-card-head{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .perk-icon-img, .perk-icon-fallback{
+    width:44px; height:44px;
+    border-radius:8px;
+    border:1.5px solid var(--gold);
+    background:radial-gradient(circle at 35% 30%, #F0C97A, #8B1A1A);
+    flex-shrink:0;
+    object-fit:cover;
+  }
+  .perk-icon-fallback{ display:none; align-items:center; justify-content:center; font-size:21px; }
+  .perk-titles{ min-width:0; }
+  .perk-name{ font-family:'Cinzel', serif; font-size:13.5px; color:var(--gold-bright); font-weight:600; line-height:1.25; }
+  .perk-level{ font-size:12px; color:var(--orange); margin-top:2px; font-weight:600; }
+  .perk-desc{ font-size:12px; line-height:1.4; color:#e6d6b8; opacity:.85; margin-bottom:6px; min-height:34px; }
+  .perk-effect{ font-size:11.5px; color:#9be8f5; margin-bottom:8px; font-weight:600; }
+  .perk-next-rank{
+    font-size:10.5px; line-height:1.35;
+    color:var(--gold-bright);
+    background:rgba(240,201,122,0.08);
+    border:1px dashed rgba(212,165,116,0.4);
+    border-radius:6px;
+    padding:4px 6px;
+    margin-bottom:8px;
+  }
+  .perk-ranks{ display:flex; gap:6px; margin-bottom:8px; }
+  .rank-badge{
+    width:21px; height:21px;
+    border-radius:50%;
+    border:1.5px solid rgba(212,165,116,0.4);
+    display:flex; align-items:center; justify-content:center;
+    font-size:9.5px;
+    color:rgba(240,201,122,0.5);
+    cursor:help;
+  }
+  .rank-badge.unlocked{
+    border-color:var(--gold-bright);
+    color:var(--gold-bright);
+    background:rgba(240,201,122,0.15);
+    box-shadow:0 0 8px rgba(240,201,122,0.6);
+  }
+  .perk-buy-btn{
+    width:100%;
+    padding:8px;
+    border-radius:8px;
+    border:1.5px solid var(--gold);
+    background:linear-gradient(180deg, #2a4568, #1A2F4C);
+    color:#f5e6c8;
+    font-family:'Cinzel', serif;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+    transition:transform .12s ease, box-shadow .12s ease, background .2s ease;
+  }
+  .perk-buy-btn:hover:not(:disabled){
+    transform:translateY(-2px);
+    box-shadow:0 4px 14px rgba(240,201,122,0.35);
+  }
+  .perk-buy-btn:disabled{ opacity:.4; cursor:not-allowed; }
+  .perk-buy-btn.maxed{ background:linear-gradient(180deg, var(--gold-bright), var(--orange)); color:#1A1A1A; }
+
+  #perk-actions{
+    display:flex; flex-wrap:wrap; justify-content:center; gap:12px;
+    max-width:980px; margin:20px auto 0;
+  }
+  .perk-action-btn{
+    font-family:'Cinzel', serif;
+    font-size:13px;
+    font-weight:600;
+    color:#f5e6c8;
+    background:linear-gradient(180deg, #2a4568, #1A2F4C);
+    border:1.5px solid var(--gold);
+    border-radius:10px;
+    padding:10px 18px;
+    cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .perk-action-btn:hover{ transform:translateY(-2px); box-shadow:0 4px 14px rgba(240,201,122,0.35); }
+  .perk-action-btn.prestige-btn{
+    display:none;
+    background:linear-gradient(180deg, #7a4fc9, #2f1a52);
+    border-color:#c9a8f5;
+    box-shadow:0 0 14px rgba(180,120,255,0.4);
+  }
+  .perk-action-btn.prestige-btn:hover{ box-shadow:0 4px 18px rgba(180,120,255,0.6); }
+
+  .float-xp.perk-tag{
+    font-size:13px;
+    color:#c9a8f5;
+    text-shadow:0 0 6px rgba(200,160,245,0.8), 0 2px 2px rgba(0,0,0,0.8);
+  }
+
   @media (max-width:640px){
     #stats-panel{ font-size:13px; padding:10px 12px; max-width:150px; bottom:118px; }
-    #upgrades-panel{ width:150px; padding:10px; bottom:118px; }
     .upgrade-btn .u-desc{ display:none; }
+    #perk-scroll-area{ bottom:118px; }
   }
 </style>
 </head>
@@ -540,7 +808,11 @@
       <div id="xp-bar-fill"></div>
       <div id="xp-bar-text"><span id="xp-text">0 / 100 XP</span></div>
     </div>
-    <div id="skillpoint-display"><span class="sp-icon">𓋹</span> Skill Points: <span id="sp-count">0</span></div>
+    <div id="energy-bar-wrap">
+      <div id="energy-bar-fill"></div>
+      <div id="energy-bar-text"><span id="energy-text">100 / 100 ⚡</span></div>
+    </div>
+    <button id="skillpoint-display" type="button"><span class="sp-icon">𓋹</span> Skill Points: <span id="sp-count">0</span></button>
   </div>
 
   <div id="char-stage">
@@ -567,30 +839,48 @@
     <div class="stat-row"><span>XP Progress</span><span id="stat-xp">0 / 100</span></div>
     <div class="stat-row"><span>Skill Points Earned</span><span id="stat-sp">0</span></div>
     <div class="stat-row"><span>Click Power</span><span id="stat-power">1</span></div>
-  </div>
-
-  <div id="upgrades-panel">
-    <h3>𓊪 Upgrades 𓊪</h3>
-    <button class="upgrade-btn" id="upg-power">
-      <span class="u-title"><span>Click Power</span><span id="power-lvl">Lv.0</span></span>
-      <span class="u-desc">+1 XP per click</span>
-      <span class="u-cost">Cost: <span id="power-cost">2</span> SP</span>
-    </button>
-    <button class="upgrade-btn" id="upg-auto">
-      <span class="u-title"><span>Auto-Clicker</span><span id="auto-lvl">Lv.0</span></span>
-      <span class="u-desc">+1 XP / second</span>
-      <span class="u-cost">Cost: <span id="auto-cost">3</span> SP</span>
-    </button>
-    <button class="upgrade-btn" id="upg-speed">
-      <span class="u-title"><span>Speed Boost</span><span id="speed-lvl">Lv.0</span></span>
-      <span class="u-desc">-5% XP needed</span>
-      <span class="u-cost">Cost: <span id="speed-cost">1</span> SP</span>
-    </button>
+    <div class="stat-row"><span>Свитки Тота</span><span id="stat-scrolls">0</span></div>
+    <div class="stat-row"><span>Золотые Иероглифы</span><span id="stat-hieroglyphs">0</span></div>
   </div>
 </div>
 
 <div class="page" id="page-skills">
   <div class="page-title">𓋹 Дерево навыков 𓋹</div>
+  <div id="perk-scroll-area">
+    <div id="perk-currency-bar">
+      <span>𓋹 <span id="perk-sp">0</span> SP</span>
+      <span>📜 <span id="perk-scrolls">0</span> Свитков Тота</span>
+      <span>𓅓 <span id="perk-hieroglyphs">0</span> Золотых Иероглифов</span>
+    </div>
+
+    <div id="base-upgrades-panel">
+      <h3>𓊪 Базовые улучшения 𓊪</h3>
+      <div id="base-upgrades-grid">
+        <button class="upgrade-btn" id="upg-power">
+          <span class="u-title"><span>Click Power</span><span id="power-lvl">Lv.0</span></span>
+          <span class="u-desc">+1 XP per click</span>
+          <span class="u-cost">Cost: <span id="power-cost">2</span> SP</span>
+        </button>
+        <button class="upgrade-btn" id="upg-auto">
+          <span class="u-title"><span>Auto-Clicker</span><span id="auto-lvl">Lv.0</span></span>
+          <span class="u-desc">+1 XP / second</span>
+          <span class="u-cost">Cost: <span id="auto-cost">3</span> SP</span>
+        </button>
+        <button class="upgrade-btn" id="upg-speed">
+          <span class="u-title"><span>Speed Boost</span><span id="speed-lvl">Lv.0</span></span>
+          <span class="u-desc">-5% XP needed</span>
+          <span class="u-cost">Cost: <span id="speed-cost">1</span> SP</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="perk-grid"></div>
+    <div id="perk-actions">
+      <button class="perk-action-btn" id="btn-buy-scroll">📜 Купить свиток Тота (10 SP)</button>
+      <button class="perk-action-btn" id="btn-respec">🔄 Респек дерева</button>
+      <button class="perk-action-btn prestige-btn" id="btn-prestige">𓅓 Престиж</button>
+    </div>
+  </div>
 </div>
 
 <div class="page" id="page-story">
@@ -606,6 +896,8 @@
 </div>
 
 <div id="levelup-banner">LEVEL UP!</div>
+<div id="perk-rank-banner"></div>
+<div id="toast-stack"></div>
 
 <nav id="bottom-nav">
   <button class="nav-btn active" data-page="clicker">Прокачка персонажа</button>
@@ -631,7 +923,125 @@
     clickPower: 1,
     powerLvl: 0,
     autoLvl: 0,
-    speedLvl: 0
+    speedLvl: 0,
+    energy: 100,
+    manualClicks: 0,
+    scrollsOfThoth: 0,
+    respecCount: 0,
+    goldenHieroglyphs: 0,
+    perks: {
+      crystal_lens: { level: 0 },
+      khopesh:      { level: 0 },
+      sacred_ash:   { level: 0 },
+      scarab:       { level: 0 },
+      jackal:       { level: 0 },
+      boat:         { level: 0 },
+      karnak:       { level: 0 },
+      feather:      { level: 0 },
+      eye:          { level: 0 },
+      vizier:       { level: 0 },
+      ankh:         { level: 0 },
+      tomb_key:     { level: 0 }
+    }
+  };
+
+  /* ============ PERK TREE DATA ============
+     NOTE on two deliberate adaptations to fit this game's existing economy:
+     - "Boss defeats" don't exist as a mechanic here, so Scrolls of Thoth are
+       instead awarded automatically every 10 levels, or purchasable with SP
+       (10 SP/scroll) rather than a banked 1000-XP currency, since XP in this
+       game is a per-level bar that's consumed on level-up, not a stockpile.
+     - "Artifacts found" / "cases solved" (Sacred Ash, Karnak Library) use
+       totalClicks / level as progression proxies, since there's no separate
+       artifact-collection or case-log system in the base game.
+  */
+  const CATEGORY_META = {
+    click:    { title:'Расследование', icon:'🔍' },
+    passive:  { title:'Автоматизация', icon:'🪲' },
+    crit:     { title:'Дедукция',      icon:'🪶' },
+    buff:     { title:'Магия',         icon:'🔱' },
+    prestige: { title:'Престиж',       icon:'𓅓' }
+  };
+
+  const PERKS_META = {
+    crystal_lens: {
+      name:'Хрустальная лупа жреца', icon:'🔍', img:'./Perks/icon_lens.png',
+      category:'click', maxLevel:20,
+      desc:'Отполированная линза из горного хрусталя, позволяющая видеть невидимые отпечатки пальцев на папирусе.',
+      effect:'+1 к силе клика за уровень',
+      specialRanks:{
+        5:'Проявляет скрытые иероглифы: каждый 50-й клик приносит x2 XP.',
+        10:'Следы на песке: критические удары оставляют след, дающий 10% силы клика за 3 сек.',
+        15:'Ритм джаза: серия быстрых кликов увеличивает множитель XP до x3.',
+        20:'Эврика: каждый 100-й клик даёт мгновенное озарение — 5% опыта до следующего уровня.'
+      }
+    },
+    khopesh: {
+      name:'Хопеш сыщика', icon:'⚔️', img:'./Perks/icon_khopesh.png',
+      category:'click', maxLevel:20,
+      desc:'Искривлённый бронзовый меч для вскрытия запертых сундуков с доказательствами.',
+      effect:'+1.5 к силе клика и +0.5% шанс мгновенного взлома дела за уровень'
+    },
+    sacred_ash: {
+      name:'Пепел священной коровы', icon:'🐄', img:'./Perks/icon_ash.png',
+      category:'click', maxLevel:20,
+      desc:'Древний метод дактилоскопии. Проявляет скрытые иероглифы-послания.',
+      effect:'+5% к силе клика за каждый найденный артефакт, за уровень'
+    },
+    scarab: {
+      name:'Бронзовые скарабеи-ищейки', icon:'🪲', img:'./Perks/icon_scarab.png',
+      category:'passive', maxLevel:20,
+      desc:'Заводные жуки, приносящие мелкие, но частые улики.',
+      effect:'+0.5 пассивного дохода в секунду за уровень'
+    },
+    jackal: {
+      name:'Шакалы-информаторы', icon:'🐺', img:'./Perks/icon_jackal.png',
+      category:'passive', maxLevel:20,
+      desc:'Уличные бродяги в масках Анубиса, знающие все шёпоты теней.',
+      effect:'+10% к пассивному доходу за уровень'
+    },
+    boat: {
+      name:'Лодка-папирус по Нилу', icon:'⛵', img:'./Perks/icon_boat.png',
+      category:'passive', maxLevel:20,
+      desc:'Патрульная лодка, опрашивающая рыбаков и торговцев на берегах.',
+      effect:'x1.5 к пассивному доходу за уровень (накопительно)'
+    },
+    karnak: {
+      name:'Библиотека Карнака', icon:'📜', img:'./Perks/icon_scrolls.png',
+      category:'passive', maxLevel:20,
+      desc:'Доступ к закрытым свиткам с записями грехов и тайных сделок знати.',
+      effect:'Пассивный доход растёт вместе с числом раскрытых дел'
+    },
+    feather: {
+      name:'Перо богини Маат', icon:'🪶', img:'./Perks/icon_feather.png',
+      category:'crit', maxLevel:20,
+      desc:'Перо истины. Тяжелеет от лжи, приложенное к сердцу подозреваемого.',
+      effect:'+2% шанс критического удара за уровень'
+    },
+    eye: {
+      name:'Око Гора', icon:'👁️', img:'./Perks/icon_eye.png',
+      category:'crit', maxLevel:20,
+      desc:'Амулет всевидящего ока. Позволяет видеть ауры лжи и скрытые мотивы.',
+      effect:'Увеличивает множитель критического удара (до x5) за уровень'
+    },
+    vizier: {
+      name:'Печать Визиря', icon:'🔱', img:'./Perks/icon_seal.png',
+      category:'buff', maxLevel:20,
+      desc:'Официальное право от лица Фараона допрашивать вельмож без страха.',
+      effect:'+10% ко всему доходу (клики и пассивный) за уровень'
+    },
+    ankh: {
+      name:'Амулет Анх', icon:'☥', img:'./Perks/icon_ankh.png',
+      category:'buff', maxLevel:20,
+      desc:'Ключ жизни. Даёт сверхъестественную выносливость без сна.',
+      effect:'-20% времени восстановления энергии за уровень'
+    },
+    tomb_key: {
+      name:'Ключ от Гробницы Истины', icon:'🗝️', img:'./Perks/icon_key.png',
+      category:'prestige', maxLevel:1,
+      desc:'Легендарный артефакт, открывающий дверь в Дуат, где хранятся абсолютные знания.',
+      effect:'Открывает Престиж: сброс прогресса в обмен на вечные Золотые Иероглифы'
+    }
   };
 
   function xpNeeded(level){
@@ -640,14 +1050,63 @@
     return Math.max(20, Math.round(base * Math.max(0.4, reduction)));
   }
 
+  function energyMax(level){
+    return 100 + (level - 1) * 10;
+  }
+
+  const ENERGY_REGEN_MS = 20000;
+
+  /* ============ PERK EFFECT CALCULATIONS ============ */
+  function getArtifactsFound(){ return Math.floor(state.totalClicks / 100); }
+  function getCasesSolved(){ return state.level; }
+
+  function getGlobalMultiplier(){
+    const vizierMult = 1 + state.perks.vizier.level * 0.10;
+    const hieroglyphMult = 1 + state.goldenHieroglyphs / 100;
+    return vizierMult * hieroglyphMult;
+  }
+
+  function getManualClickPower(){
+    let power = state.clickPower;
+    power += state.perks.crystal_lens.level * 1;
+    power += state.perks.khopesh.level * 1.5;
+    const ashMult = 1 + state.perks.sacred_ash.level * 0.05 * getArtifactsFound();
+    return power * ashMult;
+  }
+
+  function getCritChance(){ return Math.min(1, state.perks.feather.level * 0.02); }
+  function getCritMultiplier(){ return 2 + state.perks.eye.level * 0.15; }
+
+  function getPassiveIncomePerSecond(){
+    const base = state.autoLvl + state.perks.scarab.level * 0.5;
+    if(base <= 0) return 0;
+    const jackalMult = 1 + state.perks.jackal.level * 0.10;
+    const boatMult = Math.pow(1.5, state.perks.boat.level);
+    const karnakMult = 1 + state.perks.karnak.level * 0.02 * getCasesSolved();
+    return base * jackalMult * boatMult * karnakMult * getGlobalMultiplier();
+  }
+
+  function getEnergyRegenMs(){
+    return Math.max(2000, ENERGY_REGEN_MS * Math.pow(0.8, state.perks.ankh.level));
+  }
+
+  function computeGoldenHieroglyphs(){
+    return Math.floor(state.level / 10) + Math.floor(state.totalClicks / 1000);
+  }
+
   function load(){
+    let hasSavedEnergy = false;
     try{
       const raw = localStorage.getItem(SAVE_KEY);
       if(raw){
         const parsed = JSON.parse(raw);
+        hasSavedEnergy = Object.prototype.hasOwnProperty.call(parsed, 'energy');
         Object.assign(state, parsed);
       }
     }catch(e){ /* ignore corrupted save */ }
+    if(!hasSavedEnergy){
+      state.energy = energyMax(state.level);
+    }
   }
 
   let saveTimer = null;
@@ -664,7 +1123,11 @@
     levelText: document.getElementById('level-text'),
     xpFill: document.getElementById('xp-bar-fill'),
     xpText: document.getElementById('xp-text'),
+    energyFill: document.getElementById('energy-bar-fill'),
+    energyText: document.getElementById('energy-text'),
     spCount: document.getElementById('sp-count'),
+    skillpointBtn: document.getElementById('skillpoint-display'),
+    pageClicker: document.getElementById('page-clicker'),
     charWrap: document.getElementById('char-wrap'),
     charImg: document.getElementById('char-img'),
     charFallback: document.getElementById('char-fallback'),
@@ -686,6 +1149,17 @@
     powerCost: document.getElementById('power-cost'),
     autoCost: document.getElementById('auto-cost'),
     speedCost: document.getElementById('speed-cost'),
+    statScrolls: document.getElementById('stat-scrolls'),
+    statHieroglyphs: document.getElementById('stat-hieroglyphs'),
+    perkGrid: document.getElementById('perk-grid'),
+    perkSp: document.getElementById('perk-sp'),
+    perkScrolls: document.getElementById('perk-scrolls'),
+    perkHieroglyphs: document.getElementById('perk-hieroglyphs'),
+    btnBuyScroll: document.getElementById('btn-buy-scroll'),
+    btnRespec: document.getElementById('btn-respec'),
+    btnPrestige: document.getElementById('btn-prestige'),
+    perkRankBanner: document.getElementById('perk-rank-banner'),
+    toastStack: document.getElementById('toast-stack'),
   };
 
   /* ============ IMAGE FALLBACK HANDLING ============ */
@@ -709,13 +1183,22 @@
     const pct = Math.min(100, (state.xp / needed) * 100);
     el.xpFill.style.width = pct + '%';
     el.xpText.textContent = Math.floor(state.xp) + ' / ' + needed + ' XP';
+
+    const maxEnergy = energyMax(state.level);
+    const energyPct = Math.max(0, Math.min(100, (state.energy / maxEnergy) * 100));
+    el.energyFill.style.width = energyPct + '%';
+    el.energyFill.classList.toggle('low', state.energy < 1);
+    el.energyText.textContent = Math.floor(state.energy) + ' / ' + maxEnergy + ' ⚡';
+
     el.spCount.textContent = state.skillPoints;
 
     el.statClicks.textContent = state.totalClicks;
     el.statLevel.textContent = state.level;
     el.statXp.textContent = Math.floor(state.xp) + ' / ' + needed;
     el.statSp.textContent = state.totalSkillPointsEarned;
-    el.statPower.textContent = state.clickPower;
+    el.statPower.textContent = Math.round(getManualClickPower() * 10) / 10;
+    el.statScrolls.textContent = state.scrollsOfThoth;
+    el.statHieroglyphs.textContent = state.goldenHieroglyphs;
 
     el.powerLvl.textContent = 'Lv.' + state.powerLvl;
     el.autoLvl.textContent = 'Lv.' + state.autoLvl;
@@ -734,14 +1217,58 @@
   }
 
   /* ============ FLOATING XP TEXT ============ */
-  function spawnFloatXp(x, y, amount){
+  function spawnFloatText(x, y, text, className){
     const t = document.createElement('div');
-    t.className = 'float-xp';
-    t.textContent = '+' + amount + ' XP';
+    t.className = className;
+    t.textContent = text;
     t.style.left = x + 'px';
     t.style.top = y + 'px';
     document.body.appendChild(t);
     setTimeout(()=> t.remove(), 950);
+  }
+
+  function spawnFloatXp(x, y, amount){
+    spawnFloatText(x, y, '+' + amount + ' XP', 'float-xp');
+  }
+
+  function spawnNoEnergyText(x, y){
+    spawnFloatText(x, y, 'Нет энергии!', 'float-xp no-energy');
+  }
+
+  function getCharCenter(){
+    const rect = el.charWrap.getBoundingClientRect();
+    if(rect.width === 0){
+      return { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    }
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+  }
+
+  /* ============ TOASTS ============ */
+  function showToast(text){
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = text;
+    el.toastStack.appendChild(t);
+    setTimeout(function(){ t.remove(); }, 2700);
+  }
+
+  /* ============ SPARKLE PARTICLE BURST (shared by level-up & perk rank-unlock) ============ */
+  function spawnSparkleBurst(cx, cy, count){
+    const symbols = ['✦','☥','𓋹','𓂀','✧','𓆣'];
+    for(let i=0;i<count;i++){
+      const s = document.createElement('div');
+      s.className = 'sparkle';
+      s.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 90 + Math.random()*160;
+      const fx = Math.cos(angle)*dist;
+      const fy = Math.sin(angle)*dist - 40;
+      s.style.setProperty('--fly', `translate(${fx}px, ${fy}px)`);
+      s.style.left = (cx + (Math.random()*40-20)) + 'px';
+      s.style.top = (cy + (Math.random()*40-20)) + 'px';
+      document.body.appendChild(s);
+      setTimeout(()=> s.remove(), 1150);
+    }
   }
 
   /* ============ LEVEL UP CELEBRATION ============ */
@@ -759,24 +1286,39 @@
     void document.body.offsetWidth;
     document.body.classList.add('shake');
 
-    const symbols = ['✦','☥','𓋹','𓂀','✧','𓆣'];
-    const rect = el.charWrap.getBoundingClientRect();
-    const cx = rect.left + rect.width/2;
-    const cy = rect.top + rect.height/2;
-    for(let i=0;i<18;i++){
-      const s = document.createElement('div');
-      s.className = 'sparkle';
-      s.textContent = symbols[Math.floor(Math.random()*symbols.length)];
-      const angle = Math.random() * Math.PI * 2;
-      const dist = 90 + Math.random()*160;
-      const fx = Math.cos(angle)*dist;
-      const fy = Math.sin(angle)*dist - 40;
-      s.style.setProperty('--fly', `translate(${fx}px, ${fy}px)`);
-      s.style.left = (cx + (Math.random()*40-20)) + 'px';
-      s.style.top = (cy + (Math.random()*40-20)) + 'px';
-      document.body.appendChild(s);
-      setTimeout(()=> s.remove(), 1150);
-    }
+    const center = getCharCenter();
+    spawnSparkleBurst(center.x, center.y, 18);
+  }
+
+  /* ============ PERK RANK-UNLOCK CELEBRATION ============ */
+  function celebratePerkRank(key, rank){
+    const meta = PERKS_META[key];
+    const desc = meta.specialRanks && meta.specialRanks[rank];
+    if(!desc) return;
+
+    el.perkRankBanner.innerHTML = '𓋹 Новый ранг «' + meta.name + '» (' + rank + '/20) 𓋹'
+      + '<br><span style="font-size:0.72em; opacity:.9; font-weight:400;">' + desc + '</span>';
+    el.perkRankBanner.classList.remove('show');
+    void el.perkRankBanner.offsetWidth;
+    el.perkRankBanner.classList.add('show');
+
+    el.flashOverlay.classList.remove('flash');
+    void el.flashOverlay.offsetWidth;
+    el.flashOverlay.classList.add('flash');
+
+    spawnSparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 24);
+  }
+
+  /* ============ CRITICAL "TRACE" DAMAGE OVER TIME (Crystal Lens rank 10) ============ */
+  function spawnClickTrace(totalBonus){
+    const perTick = totalBonus / 3;
+    let ticks = 0;
+    const iv = setInterval(function(){
+      ticks += 1;
+      const center = getCharCenter();
+      addXp(perTick, center.x, center.y - 34, '𓆼 след');
+      if(ticks >= 3) clearInterval(iv);
+    }, 1000);
   }
 
   /* ============ AURA GROWTH WITH LEVEL ============ */
@@ -786,11 +1328,25 @@
   }
 
   /* ============ CORE CLICK LOGIC ============ */
-  function addXp(amount, clientX, clientY){
+  function isOnClickerPage(){
+    return el.pageClicker.classList.contains('active');
+  }
+
+  function addXp(amount, clientX, clientY, extraLabel){
+    if(amount <= 0) return;
+    amount = Math.round(amount * 10) / 10;
+
     state.xp += amount;
     state.totalClicks += 1;
 
-    spawnFloatXp(clientX, clientY, amount);
+    // Floating "+XP" numbers (including passive auto-clicker income) should
+    // only appear while the player is actually looking at the clicker screen.
+    if(isOnClickerPage()){
+      spawnFloatXp(clientX, clientY, amount);
+      if(extraLabel){
+        spawnFloatText(clientX, clientY - 26, extraLabel, 'float-xp perk-tag');
+      }
+    }
 
     let needed = xpNeeded(state.level);
     let leveledUp = false;
@@ -800,6 +1356,10 @@
       state.skillPoints += 1;
       state.totalSkillPointsEarned += 1;
       leveledUp = true;
+      if(state.level % 10 === 0){
+        state.scrollsOfThoth += 1;
+        showToast('📜 Получен свиток Тота за раскрытые дела! Всего: ' + state.scrollsOfThoth);
+      }
       needed = xpNeeded(state.level);
     }
 
@@ -812,21 +1372,87 @@
     save();
   }
 
-  function handleCharInteraction(clientX, clientY){
+  /* ============ MANUAL CLICK (applies all click-related perk bonuses) ============ */
+  let comboCount = 0;
+  let lastClickTimestamp = 0;
+
+  function performManualClick(clientX, clientY){
+    if(state.energy < 1){
+      el.charWrap.classList.remove('denied');
+      void el.charWrap.offsetWidth;
+      el.charWrap.classList.add('denied');
+      spawnNoEnergyText(clientX, clientY);
+      return;
+    }
+
+    state.energy -= 1;
+    state.manualClicks += 1;
+
     el.charWrap.classList.remove('clicked');
     void el.charWrap.offsetWidth;
     el.charWrap.classList.add('clicked');
-    addXp(state.clickPower, clientX, clientY);
+
+    const basePower = getManualClickPower();
+    let amount = basePower;
+    const tags = [];
+
+    // Crystal Lens rank 15: rapid-click combo, up to x3 XP
+    const now = Date.now();
+    if(state.perks.crystal_lens.level >= 15){
+      comboCount = (now - lastClickTimestamp < 700) ? Math.min(20, comboCount + 1) : 0;
+      const comboMult = 1 + comboCount * 0.1;
+      if(comboMult > 1){
+        amount *= comboMult;
+        tags.push('🔥x' + comboMult.toFixed(1));
+      }
+    }
+    lastClickTimestamp = now;
+
+    // Crystal Lens rank 5: every 50th manual click gives x2 XP
+    if(state.perks.crystal_lens.level >= 5 && state.manualClicks % 50 === 0){
+      amount *= 2;
+      tags.push('𓂀 x2');
+    }
+
+    // Feather of Ma'at (chance) + Eye of Horus (magnitude): critical hit
+    let isCrit = false;
+    if(Math.random() < getCritChance()){
+      isCrit = true;
+      amount *= getCritMultiplier();
+      tags.push('💥 КРИТ');
+    }
+
+    // Detective's Khopesh: chance to instantly crack the case for bonus XP
+    if(Math.random() < state.perks.khopesh.level * 0.005){
+      amount += basePower;
+      tags.push('⚔️ Взлом!');
+    }
+
+    addXp(amount, clientX, clientY, tags.length ? tags.join(' ') : null);
+
+    // Crystal Lens rank 10: crits leave a trace (10% of click power over 3s)
+    if(isCrit && state.perks.crystal_lens.level >= 10){
+      spawnClickTrace(basePower * 0.10);
+    }
+
+    // Crystal Lens rank 20: every 100th manual click grants an instant Eureka bonus
+    if(state.perks.crystal_lens.level >= 20 && state.manualClicks % 100 === 0){
+      const bonus = xpNeeded(state.level) * 0.05;
+      setTimeout(function(){
+        const center = getCharCenter();
+        addXp(bonus, center.x, center.y, '✨ Эврика!');
+      }, 150);
+    }
   }
 
   el.charWrap.addEventListener('click', function(e){
-    handleCharInteraction(e.clientX, e.clientY);
+    performManualClick(e.clientX, e.clientY);
   });
 
   el.charWrap.addEventListener('touchstart', function(e){
     e.preventDefault();
     const touch = e.changedTouches[0];
-    handleCharInteraction(touch.clientX, touch.clientY);
+    performManualClick(touch.clientX, touch.clientY);
   }, { passive:false });
 
   /* ============ UPGRADES ============ */
@@ -858,13 +1484,195 @@
     save();
   });
 
-  /* ============ AUTO-CLICKER TICK ============ */
+  /* ============ PERK TREE ============ */
+  const SCROLL_SP_COST = 10; // see note above PERKS_META re: XP-vs-SP currency substitution
+  const RESPEC_SCROLL_COST = 5;
+
+  function perkCost(key){
+    if(key === 'tomb_key') return 50;
+    return state.perks[key].level + 1;
+  }
+
+  function buildPerkCardHTML(key){
+    const meta = PERKS_META[key];
+    const perk = state.perks[key];
+    const isMaxed = perk.level >= meta.maxLevel;
+    const cost = perkCost(key);
+    const canAfford = state.skillPoints >= cost;
+    const catMeta = CATEGORY_META[meta.category];
+
+    let ranksHtml = '';
+    if(meta.specialRanks){
+      ranksHtml += '<div class="perk-ranks">' + [5,10,15,20].map(function(r){
+        const title = meta.specialRanks[r].replace(/"/g, '&quot;');
+        return '<span class="rank-badge' + (perk.level >= r ? ' unlocked' : '') + '" title="' + title + '">' + r + '</span>';
+      }).join('') + '</div>';
+      const nextRank = [5,10,15,20].find(function(r){ return perk.level < r; });
+      if(nextRank){
+        ranksHtml += '<div class="perk-next-rank">Ранг ' + nextRank + ': ' + meta.specialRanks[nextRank] + '</div>';
+      }
+    }
+
+    const buyLabel = isMaxed ? 'Максимум' : (key === 'tomb_key' ? ('Открыть — ' + cost + ' SP') : ('Купить — ' + cost + ' SP'));
+
+    return ''
+      + '<div class="perk-card' + (isMaxed ? ' maxed' : '') + '" data-perk="' + key + '">'
+      + '<div class="perk-category-tag">' + catMeta.icon + ' ' + catMeta.title + '</div>'
+      + '<div class="perk-card-head">'
+        + '<img class="perk-icon-img" src="' + meta.img + '" alt="">'
+        + '<div class="perk-icon-fallback">' + meta.icon + '</div>'
+        + '<div class="perk-titles">'
+          + '<div class="perk-name">' + meta.name + '</div>'
+          + '<div class="perk-level">Уровень ' + perk.level + '/' + meta.maxLevel + '</div>'
+        + '</div>'
+      + '</div>'
+      + '<div class="perk-desc">' + meta.desc + '</div>'
+      + '<div class="perk-effect">' + meta.effect + '</div>'
+      + ranksHtml
+      + '<button class="perk-buy-btn' + (isMaxed ? ' maxed' : '') + '"' + ((isMaxed || !canAfford) ? ' disabled' : '') + '>' + buyLabel + '</button>'
+      + '</div>';
+  }
+
+  function renderPerks(){
+    el.perkSp.textContent = state.skillPoints;
+    el.perkScrolls.textContent = state.scrollsOfThoth;
+    el.perkHieroglyphs.textContent = state.goldenHieroglyphs;
+
+    el.perkGrid.innerHTML = Object.keys(PERKS_META).map(buildPerkCardHTML).join('');
+    el.perkGrid.querySelectorAll('.perk-icon-img').forEach(function(img){
+      img.addEventListener('error', function(){
+        img.style.display = 'none';
+        img.nextElementSibling.style.display = 'flex';
+      });
+    });
+
+    el.btnRespec.textContent = '🔄 Респек дерева (' + (state.respecCount === 0 ? 'бесплатно' : RESPEC_SCROLL_COST + ' 📜') + ')';
+    el.btnPrestige.style.display = state.perks.tomb_key.level >= 1 ? 'inline-block' : 'none';
+  }
+
+  function flashPerkCard(key){
+    const card = el.perkGrid.querySelector('[data-perk="' + key + '"]');
+    if(!card) return;
+    card.classList.remove('perk-buy-flash');
+    void card.offsetWidth;
+    card.classList.add('perk-buy-flash');
+  }
+
+  function buyPerk(key){
+    const meta = PERKS_META[key];
+    const perk = state.perks[key];
+    if(perk.level >= meta.maxLevel) return;
+    const cost = perkCost(key);
+    if(state.skillPoints < cost) return;
+
+    state.skillPoints -= cost;
+    perk.level += 1;
+    showToast(meta.icon + ' ' + meta.name + ': уровень ' + perk.level + '!');
+
+    renderPerks();
+    render();
+    save();
+    flashPerkCard(key);
+
+    if(meta.specialRanks && meta.specialRanks[perk.level]){
+      celebratePerkRank(key, perk.level);
+    }
+  }
+
+  el.perkGrid.addEventListener('click', function(e){
+    const btn = e.target.closest('.perk-buy-btn');
+    if(!btn || btn.disabled) return;
+    const card = btn.closest('.perk-card');
+    buyPerk(card.dataset.perk);
+  });
+
+  el.btnBuyScroll.addEventListener('click', function(){
+    if(state.skillPoints < SCROLL_SP_COST){
+      showToast('Недостаточно SP: свиток стоит ' + SCROLL_SP_COST + ' SP');
+      return;
+    }
+    state.skillPoints -= SCROLL_SP_COST;
+    state.scrollsOfThoth += 1;
+    showToast('📜 Куплен свиток Тота!');
+    renderPerks();
+    render();
+    save();
+  });
+
+  el.btnRespec.addEventListener('click', function(){
+    const cost = state.respecCount === 0 ? 0 : RESPEC_SCROLL_COST;
+    if(cost > 0 && state.scrollsOfThoth < cost){
+      showToast('Нужно ' + cost + ' 📜 Свитков Тота для повторного респека');
+      return;
+    }
+    if(cost > 0) state.scrollsOfThoth -= cost;
+
+    let refund = 0;
+    Object.keys(state.perks).forEach(function(key){
+      if(key === 'tomb_key') return; // permanent prestige unlock, not reset by respec
+      const lvl = state.perks[key].level;
+      refund += lvl * (lvl + 1) / 2;
+      state.perks[key].level = 0;
+    });
+    state.skillPoints += refund;
+    state.respecCount += 1;
+
+    showToast('🔄 Респек выполнен! Возвращено ' + refund + ' SP');
+    renderPerks();
+    render();
+    save();
+  });
+
+  el.btnPrestige.addEventListener('click', function(){
+    if(state.perks.tomb_key.level < 1) return;
+    const gained = computeGoldenHieroglyphs();
+
+    state.goldenHieroglyphs += gained;
+    state.level = 1;
+    state.xp = 0;
+    state.skillPoints = 0;
+    state.totalSkillPointsEarned = 0;
+    state.clickPower = 1;
+    state.powerLvl = 0;
+    state.autoLvl = 0;
+    state.speedLvl = 0;
+    state.energy = energyMax(1);
+    Object.keys(state.perks).forEach(function(key){
+      if(key !== 'tomb_key') state.perks[key].level = 0;
+    });
+
+    render();
+    renderPerks();
+    save();
+    showToast('𓅓 Престиж! Получено Золотых Иероглифов: +' + gained);
+    spawnSparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 30);
+  });
+
+  /* ============ AUTO-CLICKER TICK (applies passive-income perk bonuses) ============ */
   setInterval(function(){
-    if(state.autoLvl > 0){
-      const rect = el.charWrap.getBoundingClientRect();
-      addXp(state.autoLvl, rect.left + rect.width/2, rect.top + rect.height/2);
+    const income = getPassiveIncomePerSecond();
+    if(income > 0){
+      const center = getCharCenter();
+      addXp(income, center.x, center.y);
     }
   }, 1000);
+
+  /* ============ ENERGY REGEN TICK ============
+     Uses a self-rescheduling timeout (rather than a fixed setInterval) so the
+     Ankh Amulet perk can speed up the regen rate immediately as it's levelled.
+  */
+  function scheduleEnergyRegen(){
+    setTimeout(function(){
+      const maxEnergy = energyMax(state.level);
+      if(state.energy < maxEnergy){
+        state.energy = Math.min(maxEnergy, state.energy + 1);
+        render();
+        save();
+      }
+      scheduleEnergyRegen();
+    }, getEnergyRegenMs());
+  }
+  scheduleEnergyRegen();
 
   /* ============ BACKGROUND: SAND PARTICLES ============ */
   const MAX_SAND = 40;
@@ -920,11 +1728,14 @@
     navButtons.forEach(function(btn){
       btn.classList.toggle('active', btn.dataset.page === name);
     });
+    if(name === 'skills') renderPerks();
   }
 
   navButtons.forEach(function(btn){
     btn.addEventListener('click', function(){ switchPage(btn.dataset.page); });
   });
+
+  el.skillpointBtn.addEventListener('click', function(){ switchPage('skills'); });
 
   /* ============ INIT ============ */
   load();
