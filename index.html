@@ -312,10 +312,63 @@
     100%{ transform:translate(-50%,-180%) scale(1.15); opacity:0; }
   }
 
+  /* ---------- PAGES / NAVIGATION ---------- */
+  .page{ display:none; }
+  .page.active{ display:block; }
+
+  .page-title{
+    position:fixed; top:26px; left:0; right:0;
+    text-align:center;
+    font-family:'Cinzel', serif;
+    font-weight:700;
+    font-size:clamp(22px,4.5vw,34px);
+    color:var(--gold-bright);
+    text-shadow:0 0 12px rgba(240,201,122,0.6), 0 2px 3px rgba(0,0,0,0.8);
+    letter-spacing:2px;
+    z-index:20;
+    pointer-events:none;
+  }
+
+  #bottom-nav{
+    position:fixed; left:0; right:0; bottom:0;
+    z-index:30;
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    gap:6px;
+    padding:10px 10px calc(10px + env(safe-area-inset-bottom, 0px));
+    background:linear-gradient(0deg, rgba(13,24,38,0.95) 0%, rgba(13,24,38,0.85) 70%, rgba(13,24,38,0) 100%);
+  }
+  .nav-btn{
+    font-family:'Cinzel', serif;
+    font-size:clamp(9.5px, 1.6vw, 13px);
+    line-height:1.25;
+    font-weight:600;
+    color:#f5e6c8;
+    background:linear-gradient(180deg, #2a4568, #1A2F4C);
+    border:1.5px solid var(--gold);
+    border-radius:10px;
+    padding:8px 4px;
+    cursor:pointer;
+    letter-spacing:.2px;
+    text-align:center;
+    transition:transform .15s ease, box-shadow .15s ease, background .2s ease, color .2s ease;
+  }
+  .nav-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 4px 14px rgba(240,201,122,0.35);
+  }
+  .nav-btn:active{ transform:translateY(0) scale(0.97); }
+  .nav-btn.active{
+    background:linear-gradient(180deg, var(--gold-bright), var(--orange));
+    color:#1A1A1A;
+    box-shadow:0 0 14px rgba(240,201,122,0.7);
+    border-color:var(--gold-bright);
+  }
+
   /* ---------- STATS PANEL ---------- */
   #stats-panel{
     position:fixed;
-    left:16px; bottom:16px;
+    left:16px; bottom:88px;
     z-index:20;
     background:rgba(13,24,38,0.72);
     border:2px solid var(--gold);
@@ -343,7 +396,7 @@
   /* ---------- UPGRADES PANEL ---------- */
   #upgrades-panel{
     position:fixed;
-    right:16px; bottom:16px;
+    right:16px; bottom:88px;
     z-index:20;
     background:rgba(13,24,38,0.72);
     border:2px solid var(--gold);
@@ -458,8 +511,8 @@
   }
 
   @media (max-width:640px){
-    #stats-panel{ font-size:13px; padding:10px 12px; max-width:150px; }
-    #upgrades-panel{ width:150px; padding:10px; }
+    #stats-panel{ font-size:13px; padding:10px 12px; max-width:150px; bottom:118px; }
+    #upgrades-panel{ width:150px; padding:10px; bottom:118px; }
     .upgrade-btn .u-desc{ display:none; }
   }
 </style>
@@ -480,61 +533,87 @@
 <div id="border-frame"></div>
 <div id="flash-overlay"></div>
 
-<div id="top-ui">
-  <div id="level-display"><span class="ankh">☥</span> <span id="level-text">Level 1</span> <span class="ankh">☥</span></div>
-  <div id="xp-bar-wrap">
-    <div id="xp-bar-fill"></div>
-    <div id="xp-bar-text"><span id="xp-text">0 / 100 XP</span></div>
+<div class="page active" id="page-clicker">
+  <div id="top-ui">
+    <div id="level-display"><span class="ankh">☥</span> <span id="level-text">Level 1</span> <span class="ankh">☥</span></div>
+    <div id="xp-bar-wrap">
+      <div id="xp-bar-fill"></div>
+      <div id="xp-bar-text"><span id="xp-text">0 / 100 XP</span></div>
+    </div>
+    <div id="skillpoint-display"><span class="sp-icon">𓋹</span> Skill Points: <span id="sp-count">0</span></div>
   </div>
-  <div id="skillpoint-display"><span class="sp-icon">𓋹</span> Skill Points: <span id="sp-count">0</span></div>
-</div>
 
-<div id="char-stage">
-  <div id="char-wrap">
-    <div id="aura"></div>
-    <div id="char-ring"></div>
-    <!--
-      Primary image source: ./photo1.png  (i.e. D:\Game\Claude\photo1.png)
-      Fallback image source: ./assets/character.png
-      If both fail to load, #char-fallback (gold circle + emoji) is shown.
-    -->
-    <img id="char-img" src="./photo1.png" alt="Pharaoh" draggable="false">
-    <div id="char-fallback">
-      <div class="emoji">👑</div>
-      <div class="msg">Place character.png in ./assets/<br>or photo1.png next to this file</div>
+  <div id="char-stage">
+    <div id="char-wrap">
+      <div id="aura"></div>
+      <div id="char-ring"></div>
+      <!--
+        Primary image source: ./photo1.png  (i.e. D:\Game\Claude\photo1.png)
+        Fallback image source: ./assets/character.png
+        If both fail to load, #char-fallback (gold circle + emoji) is shown.
+      -->
+      <img id="char-img" src="./photo1.png" alt="Pharaoh" draggable="false">
+      <div id="char-fallback">
+        <div class="emoji">👑</div>
+        <div class="msg">Place character.png in ./assets/<br>or photo1.png next to this file</div>
+      </div>
     </div>
   </div>
+
+  <div id="stats-panel">
+    <h3>𓋴 Stats 𓋴</h3>
+    <div class="stat-row"><span>Total Clicks</span><span id="stat-clicks">0</span></div>
+    <div class="stat-row"><span>Level</span><span id="stat-level">1</span></div>
+    <div class="stat-row"><span>XP Progress</span><span id="stat-xp">0 / 100</span></div>
+    <div class="stat-row"><span>Skill Points Earned</span><span id="stat-sp">0</span></div>
+    <div class="stat-row"><span>Click Power</span><span id="stat-power">1</span></div>
+  </div>
+
+  <div id="upgrades-panel">
+    <h3>𓊪 Upgrades 𓊪</h3>
+    <button class="upgrade-btn" id="upg-power">
+      <span class="u-title"><span>Click Power</span><span id="power-lvl">Lv.0</span></span>
+      <span class="u-desc">+1 XP per click</span>
+      <span class="u-cost">Cost: <span id="power-cost">2</span> SP</span>
+    </button>
+    <button class="upgrade-btn" id="upg-auto">
+      <span class="u-title"><span>Auto-Clicker</span><span id="auto-lvl">Lv.0</span></span>
+      <span class="u-desc">+1 XP / second</span>
+      <span class="u-cost">Cost: <span id="auto-cost">3</span> SP</span>
+    </button>
+    <button class="upgrade-btn" id="upg-speed">
+      <span class="u-title"><span>Speed Boost</span><span id="speed-lvl">Lv.0</span></span>
+      <span class="u-desc">-5% XP needed</span>
+      <span class="u-cost">Cost: <span id="speed-cost">1</span> SP</span>
+    </button>
+  </div>
 </div>
 
-<div id="stats-panel">
-  <h3>𓋴 Stats 𓋴</h3>
-  <div class="stat-row"><span>Total Clicks</span><span id="stat-clicks">0</span></div>
-  <div class="stat-row"><span>Level</span><span id="stat-level">1</span></div>
-  <div class="stat-row"><span>XP Progress</span><span id="stat-xp">0 / 100</span></div>
-  <div class="stat-row"><span>Skill Points Earned</span><span id="stat-sp">0</span></div>
-  <div class="stat-row"><span>Click Power</span><span id="stat-power">1</span></div>
+<div class="page" id="page-skills">
+  <div class="page-title">𓋹 Дерево навыков 𓋹</div>
 </div>
 
-<div id="upgrades-panel">
-  <h3>𓊪 Upgrades 𓊪</h3>
-  <button class="upgrade-btn" id="upg-power">
-    <span class="u-title"><span>Click Power</span><span id="power-lvl">Lv.0</span></span>
-    <span class="u-desc">+1 XP per click</span>
-    <span class="u-cost">Cost: <span id="power-cost">2</span> SP</span>
-  </button>
-  <button class="upgrade-btn" id="upg-auto">
-    <span class="u-title"><span>Auto-Clicker</span><span id="auto-lvl">Lv.0</span></span>
-    <span class="u-desc">+1 XP / second</span>
-    <span class="u-cost">Cost: <span id="auto-cost">3</span> SP</span>
-  </button>
-  <button class="upgrade-btn" id="upg-speed">
-    <span class="u-title"><span>Speed Boost</span><span id="speed-lvl">Lv.0</span></span>
-    <span class="u-desc">-5% XP needed</span>
-    <span class="u-cost">Cost: <span id="speed-cost">1</span> SP</span>
-  </button>
+<div class="page" id="page-story">
+  <div class="page-title">𓋹 Сюжетная кампания 𓋹</div>
+</div>
+
+<div class="page" id="page-daily">
+  <div class="page-title">𓋹 Ежедневные задачи 𓋹</div>
+</div>
+
+<div class="page" id="page-achievements">
+  <div class="page-title">𓋹 Достижения 𓋹</div>
 </div>
 
 <div id="levelup-banner">LEVEL UP!</div>
+
+<nav id="bottom-nav">
+  <button class="nav-btn active" data-page="clicker">Прокачка персонажа</button>
+  <button class="nav-btn" data-page="skills">Дерево навыков</button>
+  <button class="nav-btn" data-page="story">Сюжетная кампания</button>
+  <button class="nav-btn" data-page="daily">Ежедневные задачи</button>
+  <button class="nav-btn" data-page="achievements">Достижения</button>
+</nav>
 
 <script>
 (function(){
@@ -824,10 +903,34 @@
   placeDecorations();
   window.addEventListener('resize', placeDecorations);
 
+  /* ============ PAGE NAVIGATION ============ */
+  const pages = {
+    clicker: document.getElementById('page-clicker'),
+    skills: document.getElementById('page-skills'),
+    story: document.getElementById('page-story'),
+    daily: document.getElementById('page-daily'),
+    achievements: document.getElementById('page-achievements'),
+  };
+  const navButtons = document.querySelectorAll('.nav-btn');
+
+  function switchPage(name){
+    Object.keys(pages).forEach(function(key){
+      pages[key].classList.toggle('active', key === name);
+    });
+    navButtons.forEach(function(btn){
+      btn.classList.toggle('active', btn.dataset.page === name);
+    });
+  }
+
+  navButtons.forEach(function(btn){
+    btn.addEventListener('click', function(){ switchPage(btn.dataset.page); });
+  });
+
   /* ============ INIT ============ */
   load();
   render();
   updateAura();
+  switchPage('clicker');
 })();
 </script>
 
