@@ -2347,7 +2347,11 @@
     }
 
     if(leveledUp){
-      celebrateLevelUp();
+      // The level-up celebration (banner, flash, shake, sparkles) should
+      // only play while the player is actually looking at the clicker
+      // screen -- not when it's triggered by passive income while they're
+      // on the Skill Tree, leaderboard, etc.
+      if(isOnClickerPage()) celebrateLevelUp();
       updateAura();
     }
 
