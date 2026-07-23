@@ -998,6 +998,15 @@
     opacity:.8;
   }
 
+  .lb-loading{
+    text-align:center;
+    padding:28px 12px;
+    font-family:'Cormorant Garamond', serif;
+    font-size:14px;
+    font-weight:600;
+    color:#5a3a1a;
+  }
+
   #leaderboard-footer{
     position:relative; z-index:2;
     flex-shrink:0;
@@ -1220,10 +1229,123 @@
       linear-gradient(160deg, #E9C896 0%, #D4A574 45%, #A66B32 100%);
   }
 
+  /* ================================================================
+     TUTORIAL (guided first-launch tour, spoken by the hero character)
+     ================================================================ */
+  #tutorial-overlay{
+    position:fixed; left:0; right:0; bottom:78px;
+    z-index:90; /* below the leaderboard/registration modals (100/110) so
+                   opening either of those during the tour naturally covers
+                   it, without needing any extra pause/resume coordination */
+    display:none;
+    padding:0 14px;
+    pointer-events:none; /* only the box itself should intercept clicks */
+  }
+  #tutorial-overlay.open{ display:block; }
+
+  #tutorial-box{
+    pointer-events:auto;
+    max-width:640px;
+    margin:0 auto;
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    background:
+      linear-gradient(180deg, rgba(26,15,10,0.15), rgba(26,15,10,0.4)),
+      linear-gradient(160deg, #D4A574 0%, #C79462 45%, #A66B32 100%);
+    border:3px solid #FFD700;
+    border-radius:16px;
+    padding:12px 14px;
+    box-shadow:0 0 0 2px #1A0F0A, 0 8px 24px rgba(0,0,0,0.5), 0 0 30px rgba(255,215,0,0.3);
+    animation:lbCardIn .3s cubic-bezier(.2,1.4,.4,1);
+  }
+
+  #tutorial-portrait{
+    width:52px; height:52px; flex-shrink:0;
+    border-radius:50%;
+    border:2px solid #FFD700;
+    overflow:hidden;
+    background:radial-gradient(circle at 35% 30%, #F0C97A, #8B1A1A);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 12px rgba(255,215,0,0.5);
+  }
+  #tutorial-portrait-img{ width:100%; height:100%; object-fit:cover; }
+  #tutorial-portrait-fallback{ display:none; font-size:24px; }
+
+  #tutorial-content{ flex:1; min-width:0; }
+  #tutorial-text{
+    font-family:'Cormorant Garamond', serif;
+    font-size:14.5px;
+    font-weight:600;
+    color:#2a1608;
+    line-height:1.4;
+    min-height:38px;
+  }
+  #tutorial-footer{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-top:8px;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  #tutorial-dots{ display:flex; gap:5px; }
+  .tutorial-dot{
+    width:6px; height:6px; border-radius:50%;
+    background:rgba(26,15,10,0.3);
+  }
+  .tutorial-dot.active{ background:#1A0F0A; box-shadow:0 0 4px rgba(255,215,0,0.8); }
+
+  #tutorial-actions{ display:flex; gap:12px; align-items:center; }
+  #tutorial-skip{
+    font-family:'Cormorant Garamond', serif;
+    font-size:11.5px;
+    color:#5a3a1a;
+    background:none; border:none;
+    text-decoration:underline;
+    cursor:pointer;
+    padding:4px;
+  }
+  #tutorial-next{
+    font-family:'Cinzel', serif;
+    font-weight:700;
+    font-size:12.5px;
+    color:#1A0F0A;
+    background:linear-gradient(180deg, #FFE9B0, #FFD700 55%, #A66B32);
+    border:2px solid #1A0F0A;
+    border-radius:20px;
+    padding:8px 16px;
+    cursor:pointer;
+    box-shadow:0 3px 8px rgba(0,0,0,0.35);
+    transition:transform .15s ease, opacity .15s ease;
+    white-space:nowrap;
+  }
+  #tutorial-next:hover:not(:disabled){ transform:translateY(-2px); }
+  #tutorial-next:disabled{ opacity:.55; cursor:default; }
+
+  /* Pulsing gold glow applied to whatever UI element the current step is
+     talking about. Deliberately doesn't touch position/z-index, since
+     targets range from static block elements to position:fixed buttons. */
+  .tutorial-highlight{ animation:tutorialPulse 1.2s ease-in-out infinite; }
+  @keyframes tutorialPulse{
+    0%,100%{ box-shadow:0 0 0 4px rgba(255,215,0,0.85), 0 0 26px rgba(255,215,0,0.65); transform:scale(1); }
+    50%{ box-shadow:0 0 0 8px rgba(255,215,0,0.45), 0 0 40px rgba(255,215,0,0.9); transform:scale(1.03); }
+  }
+
+  /* While the tour is active, get panels that would otherwise collide with
+     the docked dialogue box out of the way. */
+  body.tutorial-active #stats-panel{ display:none; }
+  body.tutorial-active #perk-scroll-area{ bottom:210px; }
+
   @media (max-width:640px){
     #stats-panel{ font-size:13px; padding:10px 12px; max-width:150px; bottom:118px; }
     .upgrade-btn .u-desc{ display:none; }
     #perk-scroll-area{ bottom:118px; }
+    body.tutorial-active #perk-scroll-area{ bottom:230px; }
+  }
+
+  @media (max-width:480px){
+    #tutorial-portrait{ width:42px; height:42px; }
+    #tutorial-text{ font-size:13px; }
+    #tutorial-next{ font-size:11.5px; padding:7px 13px; }
   }
 </style>
 </head>
@@ -1341,6 +1463,25 @@
 <div id="perk-rank-banner"></div>
 <div id="toast-stack"></div>
 
+<div id="tutorial-overlay">
+  <div id="tutorial-box">
+    <div id="tutorial-portrait">
+      <img id="tutorial-portrait-img" src="./photo1.png" alt="" draggable="false">
+      <div id="tutorial-portrait-fallback">🧑‍💼</div>
+    </div>
+    <div id="tutorial-content">
+      <div id="tutorial-text"></div>
+      <div id="tutorial-footer">
+        <div id="tutorial-dots"></div>
+        <div id="tutorial-actions">
+          <button id="tutorial-skip" type="button">Пропустить обучение</button>
+          <button id="tutorial-next" type="button">Далее →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <button id="leaderboard-btn" class="cartouche-btn" type="button">𓋹 РЕЙТИНГ</button>
 <button id="profile-btn" class="cartouche-btn" type="button">🏛️ РЕГИСТРАЦИЯ</button>
 
@@ -1457,6 +1598,69 @@
   <button class="nav-btn" data-page="daily">Ежедневные задачи</button>
   <button class="nav-btn" data-page="achievements">Достижения</button>
 </nav>
+
+<!--
+  FIREBASE (Firestore) — shared global leaderboard backend.
+  Telegram.WebApp.CloudStorage is sandboxed per-user/per-bot: no client can
+  ever read another player's CloudStorage, so a real cross-player leaderboard
+  needs a shared database all clients can write to and read from. This module
+  exposes two small functions on `window` that the main game script (below)
+  calls; it's a separate `type="module"` script because the Firebase SDK is
+  distributed as ES modules. Guarded with `if(window.xxx)` everywhere it's
+  called, so the game still works normally (falling back to local/fake data)
+  if this script fails to load (e.g. offline, ad-blocker, etc).
+-->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { initializeFirestore, doc, setDoc, collection, query, orderBy, limit, getDocs }
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyClyIhvbWp4EUdgUUErb4hQTa1b10blseE",
+    authDomain: "egypt-vampyr.firebaseapp.com",
+    projectId: "egypt-vampyr",
+    storageBucket: "egypt-vampyr.firebasestorage.app",
+    messagingSenderId: "192721828809",
+    appId: "1:192721828809:web:cd1ec6132b8700c5824618"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  // Firestore's default transport (WebSockets/WebChannel) can hang
+  // indefinitely behind restrictive proxies or sandboxed browser previews.
+  // Auto-detecting long-polling is the documented fix and is safe to leave
+  // on permanently -- it only kicks in when the streaming transport doesn't
+  // work, otherwise behaving identically to the default.
+  const db = initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
+
+  /* Upserts the given player's entry (one document per stable player id). */
+  window.pushLeaderboardScore = async function(id, name, level){
+    try{
+      await setDoc(doc(db, 'leaderboard', String(id)), {
+        name: String(name).slice(0, 30),
+        level: Math.max(1, Math.round(level)),
+        updatedAt: Date.now()
+      });
+    }catch(e){ console.warn('[Firestore] write failed', e); }
+  };
+
+  /* Returns the top N entries (each including its document id, for de-duping
+     against the current player's own live entry), or null if the fetch
+     itself failed (distinct from an empty leaderboard, which is []). */
+  window.fetchLeaderboardTop = async function(count){
+    try{
+      const q = query(collection(db, 'leaderboard'), orderBy('level', 'desc'), limit(count || 50));
+      const snap = await getDocs(q);
+      const results = [];
+      snap.forEach(function(docSnap){
+        results.push(Object.assign({ id: docSnap.id }, docSnap.data()));
+      });
+      return results;
+    }catch(e){
+      console.warn('[Firestore] read failed', e);
+      return null;
+    }
+  };
+</script>
 
 <script>
 (function(){
@@ -1818,6 +2022,13 @@
     btnPrestige: document.getElementById('btn-prestige'),
     perkRankBanner: document.getElementById('perk-rank-banner'),
     toastStack: document.getElementById('toast-stack'),
+    tutorialOverlay: document.getElementById('tutorial-overlay'),
+    tutorialPortraitImg: document.getElementById('tutorial-portrait-img'),
+    tutorialPortraitFallback: document.getElementById('tutorial-portrait-fallback'),
+    tutorialText: document.getElementById('tutorial-text'),
+    tutorialDots: document.getElementById('tutorial-dots'),
+    tutorialNext: document.getElementById('tutorial-next'),
+    tutorialSkip: document.getElementById('tutorial-skip'),
     leaderboardBtn: document.getElementById('leaderboard-btn'),
     leaderboardOverlay: document.getElementById('leaderboard-overlay'),
     leaderboardCard: document.getElementById('leaderboard-card'),
@@ -1866,6 +2077,17 @@
     }
     el.charImg.style.display = 'none';
     el.charFallback.style.display = 'flex';
+  });
+
+  let triedTutorialAssets = false;
+  el.tutorialPortraitImg.addEventListener('error', function(){
+    if(!triedTutorialAssets){
+      triedTutorialAssets = true;
+      el.tutorialPortraitImg.src = './assets/character.png';
+      return;
+    }
+    el.tutorialPortraitImg.style.display = 'none';
+    el.tutorialPortraitFallback.style.display = 'flex';
   });
 
   /* ============ RENDER ============ */
@@ -2139,6 +2361,11 @@
         const center = getCharCenter();
         addXp(bonus, center.x, center.y, '✨ Эврика!');
       }, 150);
+    }
+
+    if(tutorialState.active && tutorialState.awaitingClick){
+      tutorialState.awaitingClick = false;
+      setTimeout(advanceTutorial, 700); // let them see the +XP popup first
     }
   }
 
@@ -2455,6 +2682,24 @@
     });
   }
 
+  /* A stable id for this player used as their Firestore leaderboard document
+     key: their real Telegram id when running inside Telegram (so the same
+     person always updates the same row), or a locally-generated id persisted
+     in localStorage as a fallback when testing outside Telegram. */
+  function getStablePlayerId(){
+    try{
+      const telegramUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+      if(telegramUser && telegramUser.id) return 'tg_' + telegramUser.id;
+    }catch(e){}
+    let anonId = null;
+    try{ anonId = localStorage.getItem('egyptClickerAnonId_v1'); }catch(e){}
+    if(!anonId){
+      anonId = 'anon_' + Date.now().toString(36) + Math.random().toString(36).slice(2);
+      try{ localStorage.setItem('egyptClickerAnonId_v1', anonId); }catch(e){}
+    }
+    return anonId;
+  }
+
   function saveLeaderboardEntryToCloud(){
     const entry = { name: getPlayerDisplayName(), level: state.level };
     const json = JSON.stringify(entry);
@@ -2463,6 +2708,12 @@
       catch(e){ try{ localStorage.setItem(LEADERBOARD_FALLBACK_KEY, json); }catch(e2){} }
     } else {
       try{ localStorage.setItem(LEADERBOARD_FALLBACK_KEY, json); }catch(e){}
+    }
+
+    // Shared global leaderboard (see the Firebase module script in <head>).
+    // Guarded since that script may not have finished loading yet.
+    if(window.pushLeaderboardScore){
+      window.pushLeaderboardScore(getStablePlayerId(), entry.name, entry.level);
     }
   }
 
@@ -2487,9 +2738,26 @@
       + '</div>';
   }
 
-  function renderLeaderboard(){
+  /* Fetches real players from Firestore (if the module loaded) and merges
+     them with the fake filler pharaohs and the current player's own live
+     entry. Async because the Firestore read is a network round-trip;
+     callers show a loading placeholder first (see openLeaderboard). */
+  async function renderLeaderboard(){
+    const myId = getStablePlayerId();
     const playerEntry = { name: getPlayerDisplayName(), level: state.level, isPlayer: true };
-    const combined = fakeLeaderboard.concat([playerEntry]).sort(function(a, b){ return b.level - a.level; });
+
+    let realEntries = [];
+    if(window.fetchLeaderboardTop){
+      const fetched = await window.fetchLeaderboardTop(50);
+      // null means the fetch itself failed (offline, rules issue, etc.) --
+      // fall back to just fake + own, same as if Firestore weren't set up.
+      if(fetched){
+        realEntries = fetched.filter(function(e){ return e.id !== myId; });
+      }
+    }
+
+    const combined = fakeLeaderboard.concat(realEntries, [playerEntry])
+      .sort(function(a, b){ return b.level - a.level; });
 
     el.leaderboardRows.innerHTML = combined.map(function(entry, i){
       return buildLeaderboardRowHTML(entry, i + 1, !!entry.isPlayer);
@@ -2527,6 +2795,7 @@
 
   function openLeaderboard(){
     saveLeaderboardEntryToCloud();
+    el.leaderboardRows.innerHTML = '<div class="lb-loading">𓋹 Загружаем рейтинг фараонов...</div>';
     renderLeaderboard();
     el.leaderboardOverlay.classList.add('open');
     spawnSandBurst();
@@ -2543,6 +2812,7 @@
   });
   el.leaderboardRefresh.addEventListener('click', function(){
     fakeLeaderboard = generateFakePharaohs();
+    el.leaderboardRows.innerHTML = '<div class="lb-loading">𓋹 Загружаем рейтинг фараонов...</div>';
     renderLeaderboard();
     spawnSandBurst();
     showToast('🌞 Таблица обновлена жрецами Ра');
@@ -2798,6 +3068,166 @@
 
   fillHieroglyphPattern(el.regHieroglyphPattern);
 
+  /* ============ TUTORIAL (guided first-launch tour) ============
+     A linear dialogue sequence spoken by the hero, walking a brand-new
+     player through every major system. Mostly advanced via the "Далее"
+     button; the very first click-related step instead waits for a real
+     click on the character (see the hook at the end of performManualClick)
+     so the player learns the core mechanic by doing it, not just reading
+     about it. Each step can pin the tour to a specific page (switchPage)
+     and/or pulse-highlight a real UI element via .tutorial-highlight, so
+     it doubles as a guided tour of the actual screens rather than just a
+     wall of text on top of the clicker.
+  */
+  const TUTORIAL_SEEN_KEY = 'egyptClickerTutorialSeen_v1';
+
+  const TUTORIAL_STEPS = [
+    {
+      page: 'clicker',
+      text: 'Приветствую, путник! Я — молодой сыщик, заброшенный в самое сердце Древнего Египта. Помоги мне распутать клубок тайн, окутавших эти земли — я покажу, с чего начать.'
+    },
+    {
+      page: 'clicker',
+      highlight: '#char-wrap',
+      requireClick: true,
+      text: 'Каждый твой клик по мне — это шаг в расследовании. Так я получаю Очки Опыта (XP). Попробуй прямо сейчас — кликни на меня!'
+    },
+    {
+      page: 'clicker',
+      highlight: '#xp-bar-wrap',
+      text: 'Вот моя шкала опыта. Заполнится до конца — и я перейду на новый Уровень, получу Очко Навыка и стану сильнее в расследованиях.'
+    },
+    {
+      page: 'clicker',
+      highlight: '#energy-bar-wrap',
+      text: 'А это моя Энергия. Каждый клик её тратит, но она сама восстанавливается — даже пока ты не в игре! Закончится энергия — придётся немного подождать.'
+    },
+    {
+      page: 'clicker',
+      highlight: '#skillpoint-display',
+      text: 'Очки Навыка — моя главная валюта. Нажми на эту кнопку — она откроет Дерево Навыков, где я трачу их с пользой.'
+    },
+    {
+      page: 'skills',
+      highlight: '#base-upgrades-panel',
+      text: 'Здесь — Базовые Улучшения: сила клика, автоматический доход от расследований и скорость роста. Первые вложения стоит делать именно сюда.'
+    },
+    {
+      page: 'skills',
+      highlight: '#perk-grid',
+      text: 'А ниже — целое Дерево Перков! Двенадцать уникальных способностей, каждую можно качать до 20 уровня. У некоторых на 5, 10, 15 и 20 ранге открываются особые эффекты — не проходи мимо.'
+    },
+    {
+      page: 'story',
+      highlight: '#page-story .page-title',
+      text: 'Здесь совсем скоро откроются Сюжетные Расследования — цепочки миссий с настоящими тайнами Египта, которые нам предстоит распутать вместе.'
+    },
+    {
+      page: 'daily',
+      highlight: '#page-daily .page-title',
+      text: 'Ежедневные Задачи будут приносить награды каждый день. Настоящий сыщик не пропускает ни дня расследования — загляни сюда снова завтра.'
+    },
+    {
+      page: 'achievements',
+      highlight: '#page-achievements .page-title',
+      text: 'В Достижениях будут храниться главные вехи твоего пути — от первого уровня до звания величайшего сыщика Египта.'
+    },
+    {
+      page: 'clicker',
+      highlight: '#leaderboard-btn',
+      text: 'Это — Таблица Фараонов. Здесь видно, как твой уровень соотносится с другими сыщиками со всего света. Проверяй, кто сейчас на вершине!'
+    },
+    {
+      page: 'clicker',
+      highlight: '#profile-btn',
+      text: 'А тут можно составить Свиток Фараона — зарегистрировать своё имя, чтобы прогресс сохранялся в облаке Telegram на любых устройствах.'
+    },
+    {
+      page: 'clicker',
+      text: 'Вот и всё, путник! Теперь ты знаешь достаточно, чтобы начать расследование. Кликай, качайся и раскрывай тайны Египта. Удачи!'
+    }
+  ];
+
+  let tutorialState = { active: false, stepIndex: 0, awaitingClick: false, highlightedEl: null };
+
+  function clearTutorialHighlight(){
+    if(tutorialState.highlightedEl){
+      tutorialState.highlightedEl.classList.remove('tutorial-highlight');
+      tutorialState.highlightedEl = null;
+    }
+  }
+
+  function applyTutorialHighlight(selector){
+    const target = document.querySelector(selector);
+    if(!target) return;
+    target.classList.add('tutorial-highlight');
+    tutorialState.highlightedEl = target;
+    if(typeof target.scrollIntoView === 'function'){
+      target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+  }
+
+  function renderTutorialDots(){
+    el.tutorialDots.innerHTML = TUTORIAL_STEPS.map(function(_, i){
+      return '<span class="tutorial-dot' + (i === tutorialState.stepIndex ? ' active' : '') + '"></span>';
+    }).join('');
+  }
+
+  function showTutorialStep(index){
+    const step = TUTORIAL_STEPS[index];
+    if(!step){ finishTutorial(); return; }
+
+    tutorialState.stepIndex = index;
+    tutorialState.awaitingClick = !!step.requireClick;
+
+    if(step.page) switchPage(step.page);
+
+    clearTutorialHighlight();
+    if(step.highlight){
+      // Small delay so switchPage's DOM/scroll changes settle first.
+      setTimeout(function(){ applyTutorialHighlight(step.highlight); }, 150);
+    }
+
+    el.tutorialText.textContent = step.text;
+    renderTutorialDots();
+
+    if(step.requireClick){
+      el.tutorialNext.disabled = true;
+      el.tutorialNext.textContent = '👆 Кликни на героя';
+    } else {
+      el.tutorialNext.disabled = false;
+      el.tutorialNext.textContent = (index === TUTORIAL_STEPS.length - 1) ? 'Начать игру →' : 'Далее →';
+    }
+  }
+
+  function advanceTutorial(){
+    if(tutorialState.awaitingClick) return;
+    showTutorialStep(tutorialState.stepIndex + 1);
+  }
+
+  function startTutorial(){
+    tutorialState.active = true;
+    document.body.classList.add('tutorial-active');
+    el.tutorialOverlay.classList.add('open');
+    showTutorialStep(0);
+  }
+
+  function finishTutorial(){
+    tutorialState.active = false;
+    clearTutorialHighlight();
+    document.body.classList.remove('tutorial-active');
+    el.tutorialOverlay.classList.remove('open');
+    switchPage('clicker');
+    try{ localStorage.setItem(TUTORIAL_SEEN_KEY, '1'); }catch(e){}
+    initUserProfile();
+  }
+
+  el.tutorialNext.addEventListener('click', function(){
+    if(el.tutorialNext.disabled) return;
+    advanceTutorial();
+  });
+  el.tutorialSkip.addEventListener('click', finishTutorial);
+
   /* ============ INIT ============ */
   load();
   const offlinePassiveGain = applyOfflinePassiveIncome();
@@ -2811,7 +3241,15 @@
   render();
   updateAura();
   switchPage('clicker');
-  initUserProfile();
+
+  let tutorialSeen = false;
+  try{ tutorialSeen = localStorage.getItem(TUTORIAL_SEEN_KEY) === '1'; }catch(e){}
+  if(tutorialSeen){
+    initUserProfile();
+  } else {
+    startTutorial(); // registration is deferred to finishTutorial() so the
+                      // two first-launch experiences don't overlap visually
+  }
 })();
 </script>
 
