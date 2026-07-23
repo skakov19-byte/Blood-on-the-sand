@@ -1392,7 +1392,7 @@
      refill the bar grows roughly like level^1.5: comfortable for a while,
      then increasingly something you have to wait out. */
   function energyRegenSecondsPerPoint(level){
-    const BASE_SECONDS = 20;
+    const BASE_SECONDS = 5;
     return BASE_SECONDS * (1 + Math.sqrt(Math.max(0, level - 1)) * 0.15);
   }
 
