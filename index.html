@@ -1514,6 +1514,7 @@
     speedLvl: 0,
     energy: 100,
     lastEnergyTimestamp: Date.now(),
+    lastPassiveTimestamp: Date.now(),
     manualClicks: 0,
     scrollsOfThoth: 0,
     respecCount: 0,
@@ -1711,6 +1712,39 @@
     }
     state.lastEnergyTimestamp = now;
     return state.energy - before;
+  }
+
+  /* How much XP is still needed to fill the current level's bar. */
+  function getXpRoomLeft(){
+    return Math.max(0, xpNeeded(state.level) - state.xp);
+  }
+
+  /* Grants passive (auto-clicker) XP for real elapsed wall-clock time,
+     exactly like applyEnergyRegen() above -- but deliberately CAPPED at
+     however much XP is left to fill the player's CURRENT level bar. Unlike
+     energy, this is only ever called once at startup to account for time
+     spent away from the game: while the app is open, passive income keeps
+     flowing uncapped via the normal per-second ticker further down. The cap
+     means being away for an hour or a week grants the same maximum of "one
+     level's worth" of passive catch-up, then stops -- it's a welcome-back
+     nudge, not a way to let the game play itself indefinitely offline.
+     Returns the amount of XP actually granted. */
+  function applyOfflinePassiveIncome(){
+    const now = Date.now();
+    const last = state.lastPassiveTimestamp || now;
+    const elapsedSeconds = Math.max(0, (now - last) / 1000);
+    state.lastPassiveTimestamp = now;
+
+    const income = getPassiveIncomePerSecond();
+    if(income <= 0 || elapsedSeconds <= 0) return 0;
+
+    const potential = income * elapsedSeconds;
+    const granted = Math.min(potential, getXpRoomLeft());
+    if(granted <= 0) return 0;
+
+    const center = getCharCenter();
+    addXp(granted, center.x, center.y);
+    return granted;
   }
 
   function computeGoldenHieroglyphs(){
@@ -2312,13 +2346,19 @@
     spawnSparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 30);
   });
 
-  /* ============ AUTO-CLICKER TICK (applies passive-income perk bonuses) ============ */
+  /* ============ AUTO-CLICKER TICK (applies passive-income perk bonuses) ============
+     Uncapped while the app is open -- the level-bar cap only applies to the
+     offline catch-up in applyOfflinePassiveIncome(). Keeps lastPassiveTimestamp
+     fresh every tick so that if the app closes right after, the next offline
+     catch-up starts counting from "just now" rather than some older point.
+  */
   setInterval(function(){
     const income = getPassiveIncomePerSecond();
     if(income > 0){
       const center = getCharCenter();
       addXp(income, center.x, center.y);
     }
+    state.lastPassiveTimestamp = Date.now();
   }, 1000);
 
   /* ============ ENERGY REGEN TICK ============
@@ -2760,6 +2800,10 @@
 
   /* ============ INIT ============ */
   load();
+  const offlinePassiveGain = applyOfflinePassiveIncome();
+  if(offlinePassiveGain >= 1){
+    showToast('💤 Пока вас не было, пассивный доход принёс +' + Math.floor(offlinePassiveGain) + ' XP');
+  }
   const offlineEnergyGain = applyEnergyRegen();
   if(offlineEnergyGain >= 1){
     showToast('💤 Пока вас не было, накопилось +' + Math.floor(offlineEnergyGain) + ' ⚡ энергии');
