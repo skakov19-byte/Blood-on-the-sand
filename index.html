@@ -1253,6 +1253,7 @@
     autoLvl: 0,
     speedLvl: 0,
     energy: 100,
+    lastEnergyTimestamp: Date.now(),
     manualClicks: 0,
     scrollsOfThoth: 0,
     respecCount: 0,
@@ -1382,7 +1383,18 @@
     return 100 + (level - 1) * 10;
   }
 
-  const ENERGY_REGEN_MS = 20000;
+  /* Seconds needed to regenerate a single energy point at a given level.
+     Grows with the square root of the level so early game feels generous
+     (20s/point at level 1, same as before) while late game slows down --
+     sqrt keeps the wait from blowing up to absurd numbers at very high
+     levels the way a linear or exponential growth curve would. Combined
+     with energyMax() (which also grows with level), the time to fully
+     refill the bar grows roughly like level^1.5: comfortable for a while,
+     then increasingly something you have to wait out. */
+  function energyRegenSecondsPerPoint(level){
+    const BASE_SECONDS = 20;
+    return BASE_SECONDS * (1 + Math.sqrt(Math.max(0, level - 1)) * 0.15);
+  }
 
   /* ============ PERK EFFECT CALCULATIONS ============ */
   function getArtifactsFound(){ return Math.floor(state.totalClicks / 100); }
@@ -1415,7 +1427,30 @@
   }
 
   function getEnergyRegenMs(){
-    return Math.max(2000, ENERGY_REGEN_MS * Math.pow(0.8, state.perks.ankh.level));
+    const perPointMs = energyRegenSecondsPerPoint(state.level) * 1000;
+    // Ankh Amulet still multiplicatively speeds this up, same as before.
+    return Math.max(300, perPointMs * Math.pow(0.8, state.perks.ankh.level));
+  }
+
+  /* Grants energy for however much real, wall-clock time has passed since
+     the last time this was called -- whether that was one second ago (the
+     normal in-session ticker) or three days ago (the app was closed). This
+     is deliberately timestamp-delta based rather than a fixed per-tick
+     increment, so it's immune to the tab being backgrounded/throttled and
+     naturally covers offline accumulation with no separate code path.
+     Returns the amount of energy actually gained. */
+  function applyEnergyRegen(){
+    const now = Date.now();
+    const last = state.lastEnergyTimestamp || now;
+    const elapsedSeconds = Math.max(0, (now - last) / 1000);
+    const before = state.energy;
+    if(elapsedSeconds > 0){
+      const maxEnergy = energyMax(state.level);
+      const secondsPerPoint = getEnergyRegenMs() / 1000;
+      state.energy = Math.min(maxEnergy, state.energy + elapsedSeconds / secondsPerPoint);
+    }
+    state.lastEnergyTimestamp = now;
+    return state.energy - before;
   }
 
   function computeGoldenHieroglyphs(){
@@ -1434,6 +1469,7 @@
     }catch(e){ /* ignore corrupted save */ }
     if(!hasSavedEnergy){
       state.energy = energyMax(state.level);
+      state.lastEnergyTimestamp = Date.now();
     }
   }
 
@@ -1974,6 +2010,7 @@
     state.autoLvl = 0;
     state.speedLvl = 0;
     state.energy = energyMax(1);
+    state.lastEnergyTimestamp = Date.now();
     Object.keys(state.perks).forEach(function(key){
       if(key !== 'tomb_key') state.perks[key].level = 0;
     });
@@ -1995,21 +2032,17 @@
   }, 1000);
 
   /* ============ ENERGY REGEN TICK ============
-     Uses a self-rescheduling timeout (rather than a fixed setInterval) so the
-     Ankh Amulet perk can speed up the regen rate immediately as it's levelled.
+     Ticks every real second and asks applyEnergyRegen() to top up energy
+     based on actual elapsed wall-clock time (see that function for why).
+     This also transparently covers offline accumulation: the same function
+     is called once at startup (see INIT) to grant energy for time spent
+     away from the game entirely.
   */
-  function scheduleEnergyRegen(){
-    setTimeout(function(){
-      const maxEnergy = energyMax(state.level);
-      if(state.energy < maxEnergy){
-        state.energy = Math.min(maxEnergy, state.energy + 1);
-        render();
-        save();
-      }
-      scheduleEnergyRegen();
-    }, getEnergyRegenMs());
-  }
-  scheduleEnergyRegen();
+  setInterval(function(){
+    applyEnergyRegen();
+    render();
+    save();
+  }, 1000);
 
   /* ============ BACKGROUND: SAND PARTICLES ============ */
   const MAX_SAND = 40;
@@ -2194,6 +2227,10 @@
 
   /* ============ INIT ============ */
   load();
+  const offlineEnergyGain = applyEnergyRegen();
+  if(offlineEnergyGain >= 1){
+    showToast('💤 Пока вас не было, накопилось +' + Math.floor(offlineEnergyGain) + ' ⚡ энергии');
+  }
   render();
   updateAura();
   switchPage('clicker');
