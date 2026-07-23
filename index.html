@@ -785,11 +785,15 @@
      LEADERBOARD ("ТАБЛИЦА ФАРАОНОВ")
      ================================================================ */
 
-  /* ---------- Cartouche launcher button ---------- */
-  #leaderboard-btn{
-    position:fixed; top:18px; right:14px; z-index:25;
+  /* ---------- Cartouche launcher buttons (leaderboard + profile) ---------- */
+  .cartouche-btn{
+    position:fixed; top:18px; z-index:25;
     display:flex; align-items:center; justify-content:center;
     gap:5px;
+    max-width:46vw;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
     padding:9px 16px 13px;
     font-family:'Cinzel', serif;
     font-weight:700;
@@ -810,7 +814,7 @@
     text-shadow:0 1px 1px rgba(255,255,255,0.35);
     transition:transform .15s ease, box-shadow .15s ease;
   }
-  #leaderboard-btn::after{
+  .cartouche-btn::after{
     content:'';
     position:absolute;
     bottom:5px; left:50%; transform:translateX(-50%);
@@ -818,11 +822,14 @@
     background:#1A0F0A;
     border-radius:2px;
   }
-  #leaderboard-btn:hover{
+  .cartouche-btn:hover{
     transform:translateY(-2px);
     box-shadow:0 0 0 2px #1A0F0A inset, 0 6px 16px rgba(0,0,0,0.55), 0 0 22px rgba(255,215,0,0.65);
   }
-  #leaderboard-btn:active{ transform:translateY(0) scale(0.96); }
+  .cartouche-btn:active{ transform:translateY(0) scale(0.96); }
+
+  #leaderboard-btn{ right:14px; }
+  #profile-btn{ left:14px; }
 
   /* ---------- Modal overlay ---------- */
   #leaderboard-overlay{
@@ -864,13 +871,13 @@
       repeating-linear-gradient(0deg, rgba(26,15,10,0.05) 0 1px, transparent 1px 26px),
       repeating-linear-gradient(90deg, rgba(26,15,10,0.05) 0 1px, transparent 1px 26px);
   }
-  #hieroglyph-pattern{
+  .hieroglyph-pattern{
     position:absolute; inset:0;
     z-index:0;
     overflow:hidden;
     pointer-events:none;
   }
-  #hieroglyph-pattern span{
+  .hieroglyph-pattern span{
     position:absolute;
     font-size:22px;
     color:rgba(26,15,10,0.14);
@@ -890,7 +897,7 @@
   .lb-corner.bl{ bottom:8px; left:10px; }
   .lb-corner.br{ bottom:8px; right:10px; }
 
-  #leaderboard-close{
+  .egypt-close-btn{
     position:absolute; top:10px; right:10px; z-index:5;
     width:34px; height:34px;
     border-radius:50%;
@@ -903,8 +910,8 @@
     box-shadow:0 3px 8px rgba(0,0,0,0.5);
     transition:transform .15s ease;
   }
-  #leaderboard-close:hover{ transform:rotate(15deg) scale(1.08); }
-  #leaderboard-close:active{ transform:rotate(0deg) scale(0.94); }
+  .egypt-close-btn:hover{ transform:rotate(15deg) scale(1.08); }
+  .egypt-close-btn:active{ transform:rotate(0deg) scale(0.94); }
 
   #leaderboard-header{
     position:relative; z-index:2;
@@ -1043,9 +1050,174 @@
   }
 
   @media (max-width:520px){
-    #leaderboard-btn{ font-size:9.5px; padding:8px 12px 12px; top:12px; right:10px; }
+    .cartouche-btn{ font-size:9px; padding:8px 10px 12px; top:12px; max-width:40vw; }
+    #leaderboard-btn{ right:10px; }
+    #profile-btn{ left:10px; }
     .lb-header-row, .lb-row{ grid-template-columns:48px 1fr 60px; font-size:13px; }
     #leaderboard-header h2{ font-size:15px; }
+  }
+
+  /* ================================================================
+     REGISTRATION / PROFILE ("СВИТОК ФАРАОНА")
+     ================================================================ */
+  #registration-overlay{
+    position:fixed; inset:0;
+    z-index:110;
+    display:none;
+    align-items:center; justify-content:center;
+    padding:18px;
+    background:rgba(10,6,3,0.75);
+    backdrop-filter:blur(2px);
+  }
+  #registration-overlay.open{ display:flex; }
+
+  #registration-card{
+    position:relative;
+    width:min(480px, 100%);
+    max-height:min(760px, 92vh);
+    display:flex; flex-direction:column;
+    overflow:hidden;
+    border-radius:18px;
+    border:4px solid #FFD700;
+    box-shadow:0 0 0 3px #A66B32, 0 0 40px rgba(255,215,0,0.35), 0 20px 50px rgba(0,0,0,0.6);
+    background:
+      linear-gradient(180deg, rgba(26,15,10,0.2), rgba(26,15,10,0.5)),
+      linear-gradient(160deg, #D4A574 0%, #C79462 45%, #A66B32 100%);
+    animation:lbCardIn .35s cubic-bezier(.2,1.4,.4,1);
+  }
+
+  #registration-header{
+    position:relative; z-index:2;
+    text-align:center;
+    padding:20px 44px 8px;
+    flex-shrink:0;
+  }
+  #registration-header h2{
+    margin:0;
+    font-family:'Cinzel', serif;
+    font-weight:800;
+    font-size:clamp(16px,3.6vw,22px);
+    letter-spacing:1.5px;
+    color:#3a1f0a;
+    text-shadow:0 1px 0 rgba(255,255,255,0.4), 0 2px 4px rgba(0,0,0,0.25);
+  }
+  #registration-header .reg-subtitle{
+    margin-top:4px;
+    font-size:12px;
+    color:#5a3a1a;
+    letter-spacing:.5px;
+  }
+
+  #registration-body{
+    position:relative; z-index:2;
+    overflow-y:auto;
+    padding:8px 22px 4px;
+    flex:1;
+  }
+
+  .reg-field{ margin-bottom:12px; }
+  .reg-field label{
+    display:block;
+    font-family:'Cinzel', serif;
+    font-size:11.5px;
+    font-weight:700;
+    letter-spacing:.5px;
+    color:#2a1608;
+    margin-bottom:4px;
+  }
+  .reg-field input, .reg-field select{
+    width:100%;
+    font-family:'Cormorant Garamond', serif;
+    font-size:15px;
+    font-weight:600;
+    color:#2a1608;
+    background:rgba(255,248,230,0.85);
+    border:2px solid #1A0F0A;
+    border-radius:8px;
+    padding:8px 10px;
+    box-shadow:inset 0 2px 4px rgba(0,0,0,0.15);
+  }
+  .reg-field input:focus, .reg-field select:focus{
+    outline:none;
+    border-color:#FFD700;
+    box-shadow:inset 0 2px 4px rgba(0,0,0,0.15), 0 0 0 2px rgba(255,215,0,0.5);
+  }
+  .reg-hint{ font-size:10.5px; color:#5a3a1a; opacity:.85; margin-top:3px; line-height:1.3; }
+  .reg-error{ font-size:11px; color:#8B1A1A; font-weight:700; margin-top:3px; min-height:0; }
+
+  #registration-submit{
+    width:100%;
+    margin-top:6px;
+    font-family:'Cinzel', serif;
+    font-weight:700;
+    font-size:14px;
+    letter-spacing:.5px;
+    color:#3a1f0a;
+    background:radial-gradient(circle at 35% 30%, #FFE9B0, #FFD700 55%, #A66B32 100%);
+    border:2px solid #1A0F0A;
+    border-radius:24px;
+    padding:11px 20px;
+    cursor:pointer;
+    box-shadow:0 4px 12px rgba(0,0,0,0.35);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  #registration-submit:hover{ transform:translateY(-2px); box-shadow:0 6px 16px rgba(0,0,0,0.4); }
+  #registration-submit:active{ transform:translateY(0) scale(0.98); }
+
+  #registration-alt-actions{
+    display:flex; flex-wrap:wrap; justify-content:center; gap:10px;
+    padding:12px 16px 18px;
+    position:relative; z-index:2;
+    flex-shrink:0;
+  }
+  .reg-alt-btn{
+    font-family:'Cormorant Garamond', serif;
+    font-weight:600;
+    font-size:12.5px;
+    color:#2a1608;
+    background:rgba(255,248,230,0.55);
+    border:1.5px solid rgba(26,15,10,0.4);
+    border-radius:16px;
+    padding:7px 14px;
+    cursor:pointer;
+    transition:transform .15s ease, background .15s ease;
+  }
+  .reg-alt-btn:hover{ transform:translateY(-2px); background:rgba(255,248,230,0.85); }
+
+  /* ---------- Profile summary (already-registered view) ---------- */
+  #profile-summary{ display:none; }
+  #profile-summary.show{ display:block; }
+  .profile-summary-row{
+    display:flex; justify-content:space-between; gap:12px;
+    font-family:'Cormorant Garamond', serif;
+    font-size:14.5px;
+    font-weight:600;
+    color:#2a1608;
+    padding:7px 4px;
+    border-bottom:1px dashed rgba(26,15,10,0.25);
+  }
+  .profile-summary-row span:first-child{ opacity:.75; }
+  .profile-summary-row span:last-child{ font-family:'Cinzel', serif; color:#3a1f0a; }
+
+  #profile-god-badge{
+    text-align:center;
+    font-family:'Cinzel', serif;
+    font-size:15px;
+    font-weight:700;
+    color:#3a1f0a;
+    margin-bottom:10px;
+    padding:8px;
+    background:rgba(255,215,0,0.18);
+    border:1.5px solid rgba(255,215,0,0.6);
+    border-radius:10px;
+  }
+
+  /* ---------- Telegram light theme adjustments (registration) ---------- */
+  :root[data-tg-scheme="light"] #registration-overlay{ background:rgba(60,45,30,0.55); }
+  :root[data-tg-scheme="light"] #registration-card{
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05)),
+      linear-gradient(160deg, #E9C896 0%, #D4A574 45%, #A66B32 100%);
   }
 
   @media (max-width:640px){
@@ -1169,16 +1341,17 @@
 <div id="perk-rank-banner"></div>
 <div id="toast-stack"></div>
 
-<button id="leaderboard-btn" type="button">𓋹 РЕЙТИНГ</button>
+<button id="leaderboard-btn" class="cartouche-btn" type="button">𓋹 РЕЙТИНГ</button>
+<button id="profile-btn" class="cartouche-btn" type="button">🏛️ РЕГИСТРАЦИЯ</button>
 
 <div id="leaderboard-overlay">
   <div id="leaderboard-card">
-    <div id="hieroglyph-pattern"></div>
+    <div id="hieroglyph-pattern" class="hieroglyph-pattern"></div>
     <span class="lb-corner tl">𓊪</span>
     <span class="lb-corner tr">𓊪</span>
     <span class="lb-corner bl">𓊪</span>
     <span class="lb-corner br">𓊪</span>
-    <button id="leaderboard-close" type="button" aria-label="Закрыть">𓆣</button>
+    <button id="leaderboard-close" class="egypt-close-btn" type="button" aria-label="Закрыть">𓆣</button>
 
     <div id="leaderboard-header">
       <h2>📜 ТАБЛИЦА ФАРАОНОВ 📜</h2>
@@ -1198,6 +1371,81 @@
 
     <div id="leaderboard-footer">
       <button id="leaderboard-refresh" type="button"><span class="ra-disk">🌞</span> Обновить</button>
+    </div>
+  </div>
+</div>
+
+<div id="registration-overlay">
+  <div id="registration-card">
+    <div id="reg-hieroglyph-pattern" class="hieroglyph-pattern"></div>
+    <span class="lb-corner tl">𓊪</span>
+    <span class="lb-corner tr">𓊪</span>
+    <span class="lb-corner bl">𓊪</span>
+    <span class="lb-corner br">𓊪</span>
+    <button id="registration-close" class="egypt-close-btn" type="button" aria-label="Закрыть">𓋹</button>
+
+    <div id="registration-header">
+      <h2>📜 СВИТОК ФАРАОНА</h2>
+      <div class="reg-subtitle">Впиши своё имя в анналы Египта</div>
+    </div>
+
+    <div id="registration-body">
+      <!-- Registration form: shown when no profile exists yet -->
+      <form id="registration-form">
+        <div class="reg-field">
+          <label for="reg-name">🏛️ Имя фараона</label>
+          <input id="reg-name" type="text" maxlength="20" autocomplete="off">
+          <div class="reg-error" id="reg-name-error"></div>
+        </div>
+        <div class="reg-field">
+          <label for="reg-age">⏳ Возраст</label>
+          <input id="reg-age" type="number" min="7" max="99">
+          <div class="reg-error" id="reg-age-error"></div>
+        </div>
+        <div class="reg-field">
+          <label for="reg-email">✉️ Почта</label>
+          <input id="reg-email" type="email" autocomplete="off">
+          <div class="reg-error" id="reg-email-error"></div>
+        </div>
+        <div class="reg-field">
+          <label for="reg-god">🗿 Бог-покровитель</label>
+          <select id="reg-god">
+            <option value="">— выбери покровителя —</option>
+            <option>Ра</option>
+            <option>Анубис</option>
+            <option>Гор</option>
+            <option>Исида</option>
+            <option>Тот</option>
+            <option>Бастет</option>
+            <option>Осирис</option>
+          </select>
+          <div class="reg-error" id="reg-god-error"></div>
+        </div>
+        <div class="reg-field">
+          <label for="reg-secret">🔑 Секретное слово (необязательно)</label>
+          <input id="reg-secret" type="password" maxlength="10" autocomplete="off">
+          <div class="reg-hint">Не настоящий пароль — просто подсказка тебе самому при восстановлении из файла-бэкапа на новом устройстве. Всё хранится только на твоём устройстве и в твоём Telegram-облаке, ни на какой сервер ничего не отправляется.</div>
+          <div class="reg-error" id="reg-secret-error"></div>
+        </div>
+        <button type="submit" id="registration-submit">𓋹 Скрепить свиток печатью</button>
+      </form>
+
+      <!-- Profile summary: shown instead of the form once a profile exists -->
+      <div id="profile-summary">
+        <div id="profile-god-badge"></div>
+        <div class="profile-summary-row"><span>Имя фараона</span><span id="profile-name"></span></div>
+        <div class="profile-summary-row"><span>Уровень</span><span id="profile-level"></span></div>
+        <div class="profile-summary-row"><span>Кликов всего</span><span id="profile-clicks"></span></div>
+        <div class="profile-summary-row"><span>Зарегистрирован</span><span id="profile-registered-at"></span></div>
+        <div class="profile-summary-row"><span>Хранилище</span><span id="profile-sync-status"></span></div>
+      </div>
+    </div>
+
+    <div id="registration-alt-actions">
+      <button class="reg-alt-btn" id="reg-import-btn" type="button">📂 Восстановить из файла</button>
+      <button class="reg-alt-btn" id="reg-export-btn" type="button">💾 Скачать бэкап</button>
+      <button class="reg-alt-btn" id="reg-skip-btn" type="button">Играть без регистрации →</button>
+      <input type="file" id="reg-import-file-input" accept="application/json" style="display:none;">
     </div>
   </div>
 </div>
@@ -1231,7 +1479,19 @@
     try{ tg.onEvent('themeChanged', applyTelegramTheme); }catch(e){}
   }
 
-  function getTelegramPlayerName(){
+  /* CloudStorage needs Bot API 6.9+; outside Telegram (or on an older client)
+     we transparently fall back to localStorage everywhere it's used below. */
+  function isCloudStorageSupported(){
+    return !!(tg && tg.CloudStorage && (!tg.isVersionAtLeast || tg.isVersionAtLeast('6.9')));
+  }
+
+  /* Prefers the player's registered "Pharaoh name" (see the registration
+     system further down) over their raw Telegram identity, so the name they
+     chose is what shows up on the leaderboard etc. `userProfile` is declared
+     later but this is only ever called at runtime, well after that line has
+     executed -- see the other hoisting notes in this file for why that's safe. */
+  function getPlayerDisplayName(){
+    if(userProfile && userProfile.username) return userProfile.username;
     try{
       const user = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
       if(user) return user.username ? '@' + user.username : (user.first_name || 'Игрок');
@@ -1392,7 +1652,7 @@
      refill the bar grows roughly like level^1.5: comfortable for a while,
      then increasingly something you have to wait out. */
   function energyRegenSecondsPerPoint(level){
-    const BASE_SECONDS = 5;
+    const BASE_SECONDS = 20;
     return BASE_SECONDS * (1 + Math.sqrt(Math.max(0, level - 1)) * 0.15);
   }
 
@@ -1531,6 +1791,33 @@
     leaderboardRows: document.getElementById('leaderboard-rows'),
     leaderboardRefresh: document.getElementById('leaderboard-refresh'),
     hieroglyphPattern: document.getElementById('hieroglyph-pattern'),
+    profileBtn: document.getElementById('profile-btn'),
+    registrationOverlay: document.getElementById('registration-overlay'),
+    registrationCard: document.getElementById('registration-card'),
+    registrationClose: document.getElementById('registration-close'),
+    regHieroglyphPattern: document.getElementById('reg-hieroglyph-pattern'),
+    registrationForm: document.getElementById('registration-form'),
+    profileSummary: document.getElementById('profile-summary'),
+    regName: document.getElementById('reg-name'),
+    regAge: document.getElementById('reg-age'),
+    regEmail: document.getElementById('reg-email'),
+    regGod: document.getElementById('reg-god'),
+    regSecret: document.getElementById('reg-secret'),
+    regNameError: document.getElementById('reg-name-error'),
+    regAgeError: document.getElementById('reg-age-error'),
+    regEmailError: document.getElementById('reg-email-error'),
+    regGodError: document.getElementById('reg-god-error'),
+    regSecretError: document.getElementById('reg-secret-error'),
+    regImportBtn: document.getElementById('reg-import-btn'),
+    regExportBtn: document.getElementById('reg-export-btn'),
+    regSkipBtn: document.getElementById('reg-skip-btn'),
+    regImportFileInput: document.getElementById('reg-import-file-input'),
+    profileGodBadge: document.getElementById('profile-god-badge'),
+    profileName: document.getElementById('profile-name'),
+    profileLevel: document.getElementById('profile-level'),
+    profileClicks: document.getElementById('profile-clicks'),
+    profileRegisteredAt: document.getElementById('profile-registered-at'),
+    profileSyncStatus: document.getElementById('profile-sync-status'),
   };
 
   /* ============ IMAGE FALLBACK HANDLING ============ */
@@ -1734,7 +2021,10 @@
       needed = xpNeeded(state.level);
     }
 
-    if(leveledUp) saveLeaderboardEntryToCloud();
+    if(leveledUp){
+      saveLeaderboardEntryToCloud();
+      if(userProfile) persistUserProfile();
+    }
 
     if(leveledUp){
       celebrateLevelUp();
@@ -2125,14 +2415,8 @@
     });
   }
 
-  /* CloudStorage needs Bot API 6.9+; outside Telegram (or on an older client)
-     we fall back to localStorage so the "current player" row still works. */
-  function isCloudStorageSupported(){
-    return !!(tg && tg.CloudStorage && (!tg.isVersionAtLeast || tg.isVersionAtLeast('6.9')));
-  }
-
   function saveLeaderboardEntryToCloud(){
-    const entry = { name: getTelegramPlayerName(), level: state.level };
+    const entry = { name: getPlayerDisplayName(), level: state.level };
     const json = JSON.stringify(entry);
     if(isCloudStorageSupported()){
       try{ tg.CloudStorage.setItem(LEADERBOARD_CLOUD_KEY, json); }
@@ -2164,7 +2448,7 @@
   }
 
   function renderLeaderboard(){
-    const playerEntry = { name: getTelegramPlayerName(), level: state.level, isPlayer: true };
+    const playerEntry = { name: getPlayerDisplayName(), level: state.level, isPlayer: true };
     const combined = fakeLeaderboard.concat([playerEntry]).sort(function(a, b){ return b.level - a.level; });
 
     el.leaderboardRows.innerHTML = combined.map(function(entry, i){
@@ -2172,7 +2456,7 @@
     }).join('');
   }
 
-  function spawnHieroglyphPattern(){
+  function fillHieroglyphPattern(container){
     const symbols = ['☥','𓆣','𓂀','𓋹','𓅓'];
     let html = '';
     for(let row = 0; row < 7; row++){
@@ -2181,11 +2465,12 @@
         html += '<span style="left:' + (col * 18 + (row % 2) * 9) + '%; top:' + (row * 15) + '%;">' + sym + '</span>';
       }
     }
-    el.hieroglyphPattern.innerHTML = html;
+    container.innerHTML = html;
   }
 
-  function spawnSandBurst(){
-    const cardWidth = el.leaderboardCard.clientWidth || 400;
+  function spawnSandBurst(cardEl){
+    const card = cardEl || el.leaderboardCard;
+    const cardWidth = card.clientWidth || 400;
     for(let i = 0; i < 26; i++){
       const p = document.createElement('div');
       p.className = 'lb-sand-particle';
@@ -2195,7 +2480,7 @@
       p.style.left = (Math.random() * cardWidth) + 'px';
       p.style.animationDuration = (0.8 + Math.random() * 0.7) + 's';
       p.style.animationDelay = (Math.random() * 0.3) + 's';
-      el.leaderboardCard.appendChild(p);
+      card.appendChild(p);
       setTimeout(function(){ p.remove(); }, 2000);
     }
   }
@@ -2223,7 +2508,255 @@
     showToast('🌞 Таблица обновлена жрецами Ра');
   });
 
-  spawnHieroglyphPattern();
+  fillHieroglyphPattern(el.hieroglyphPattern);
+
+  /* ============ REGISTRATION / PROFILE ("СВИТОК ФАРАОНА") ============
+     Storage priority for the player's profile, per spec:
+       1) Telegram CloudStorage (syncs across the player's devices)
+       2) localStorage (fast offline fallback on this device)
+       3) A manually exported/imported .json backup file
+     Both CloudStorage and localStorage are written together on every save
+     (the "dual save") so neither is ever the sole copy while both are
+     available. This is all 100% client-side -- there is no backend -- so
+     "email" is only ever format-validated (nothing is ever actually sent
+     to it), and the "secret word" is a personal reminder used only to help
+     the player recognize their own imported backup file, not a real
+     authentication credential; nothing client-side can protect an account
+     the way a server-checked password could.
+  */
+  const EGYPT_USER_DATA_KEY = 'egypt_user_data';
+  const EGYPT_LAST_SYNC_KEY = 'egypt_last_sync';
+  const EGYPT_REG_SKIPPED_KEY = 'egyptClickerRegSkipped_v1';
+  const PATRON_GODS = ['Ра','Анубис','Гор','Исида','Тот','Бастет','Осирис'];
+  const GOD_EMOJI = { 'Ра':'☀️', 'Анубис':'𓃥', 'Гор':'𓂀', 'Исида':'𓆓', 'Тот':'𓅃', 'Бастет':'𓃠', 'Осирис':'𓋹' };
+
+  let userProfile = null;
+
+  function cloudGetItem(key, callback){
+    if(!isCloudStorageSupported()){ callback(null); return; }
+    try{
+      tg.CloudStorage.getItem(key, function(err, value){ callback(err ? null : (value || null)); });
+    }catch(e){ callback(null); }
+  }
+
+  function syncGameStatsIntoProfile(){
+    if(!userProfile) return;
+    userProfile.gameStats = {
+      level: state.level,
+      clicks: state.manualClicks,
+      score: state.level * 1000 + state.totalSkillPointsEarned,
+      totalClicks: state.totalClicks,
+      lastPlayed: new Date().toISOString()
+    };
+  }
+
+  function persistUserProfile(){
+    if(!userProfile) return;
+    syncGameStatsIntoProfile();
+    userProfile.isSynced = isCloudStorageSupported();
+    const json = JSON.stringify(userProfile);
+    try{ localStorage.setItem(EGYPT_USER_DATA_KEY, json); }catch(e){}
+    if(isCloudStorageSupported()){
+      try{
+        tg.CloudStorage.setItem(EGYPT_USER_DATA_KEY, json);
+        tg.CloudStorage.setItem(EGYPT_LAST_SYNC_KEY, String(Date.now()));
+      }catch(e){}
+    }
+  }
+
+  function initUserProfile(){
+    cloudGetItem(EGYPT_USER_DATA_KEY, function(cloudValue){
+      if(cloudValue){
+        try{
+          userProfile = JSON.parse(cloudValue);
+          try{ localStorage.setItem(EGYPT_USER_DATA_KEY, cloudValue); }catch(e){}
+          onUserProfileReady();
+          return;
+        }catch(e){ /* corrupted cloud value -- fall through to localStorage */ }
+      }
+
+      let localValue = null;
+      try{ localValue = localStorage.getItem(EGYPT_USER_DATA_KEY); }catch(e){}
+      if(localValue){
+        try{
+          userProfile = JSON.parse(localValue);
+          onUserProfileReady();
+          if(isCloudStorageSupported()){
+            try{ tg.CloudStorage.setItem(EGYPT_USER_DATA_KEY, localValue); }catch(e){}
+          }
+          return;
+        }catch(e){ /* corrupted local value -- fall through to registration */ }
+      }
+
+      let skipped = false;
+      try{ skipped = localStorage.getItem(EGYPT_REG_SKIPPED_KEY) === '1'; }catch(e){}
+      updateProfileButtonLabel();
+      if(!skipped) openRegistration();
+    });
+  }
+
+  function onUserProfileReady(){
+    updateProfileButtonLabel();
+    closeRegistration();
+  }
+
+  function updateProfileButtonLabel(){
+    el.profileBtn.textContent = userProfile ? ('🏛️ ' + userProfile.username) : '🏛️ РЕГИСТРАЦИЯ';
+  }
+
+  function formatRegisteredDate(iso){
+    try{ return new Date(iso).toLocaleDateString('ru-RU'); }
+    catch(e){ return iso || '—'; }
+  }
+
+  /* ---------- Open/close, switching between the form and the summary ---------- */
+  function openRegistration(){
+    if(userProfile) showProfileSummary(); else showRegistrationForm();
+    el.registrationOverlay.classList.add('open');
+    spawnSandBurst(el.registrationCard);
+  }
+
+  function closeRegistration(){
+    el.registrationOverlay.classList.remove('open');
+  }
+
+  function showRegistrationForm(){
+    el.registrationForm.style.display = 'block';
+    el.profileSummary.classList.remove('show');
+    clearRegErrors();
+  }
+
+  function showProfileSummary(){
+    el.registrationForm.style.display = 'none';
+    el.profileSummary.classList.add('show');
+    syncGameStatsIntoProfile();
+    el.profileGodBadge.textContent = (GOD_EMOJI[userProfile.god] || '𓋹') + ' Хранитель: ' + userProfile.god;
+    el.profileName.textContent = userProfile.username;
+    el.profileLevel.textContent = userProfile.gameStats.level;
+    el.profileClicks.textContent = userProfile.gameStats.totalClicks;
+    el.profileRegisteredAt.textContent = formatRegisteredDate(userProfile.registeredAt);
+    el.profileSyncStatus.textContent = isCloudStorageSupported() ? '☁️ Telegram Cloud' : '💾 Это устройство';
+  }
+
+  el.profileBtn.addEventListener('click', openRegistration);
+  el.registrationClose.addEventListener('click', closeRegistration);
+  el.registrationOverlay.addEventListener('click', function(e){
+    if(e.target === el.registrationOverlay) closeRegistration();
+  });
+
+  /* ---------- Form validation + submit ---------- */
+  function clearRegErrors(){
+    el.regNameError.textContent = '';
+    el.regAgeError.textContent = '';
+    el.regEmailError.textContent = '';
+    el.regGodError.textContent = '';
+    el.regSecretError.textContent = '';
+  }
+
+  el.registrationForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    clearRegErrors();
+
+    const name = el.regName.value.trim();
+    const age = parseInt(el.regAge.value, 10);
+    const email = el.regEmail.value.trim();
+    const god = el.regGod.value;
+    const secret = el.regSecret.value.trim();
+
+    let valid = true;
+    if(name.length < 3 || name.length > 20){ el.regNameError.textContent = 'От 3 до 20 символов'; valid = false; }
+    if(!Number.isInteger(age) || age < 7 || age > 99){ el.regAgeError.textContent = 'От 7 до 99 лет'; valid = false; }
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ el.regEmailError.textContent = 'Похоже, это не настоящая почта'; valid = false; }
+    if(PATRON_GODS.indexOf(god) === -1){ el.regGodError.textContent = 'Выбери покровителя'; valid = false; }
+    if(secret && (secret.length < 4 || secret.length > 10)){ el.regSecretError.textContent = 'От 4 до 10 символов (или оставь пустым)'; valid = false; }
+    if(!valid) return;
+
+    const telegramUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+    const telegramId = (telegramUser && telegramUser.id) ? String(telegramUser.id) : null;
+
+    userProfile = {
+      id: telegramId || ('user_' + Date.now()),
+      username: name,
+      age: age,
+      email: email,
+      god: god,
+      secretWord: secret || null,
+      registeredAt: new Date().toISOString(),
+      gameStats: {
+        level: state.level,
+        clicks: state.manualClicks,
+        score: state.level * 1000 + state.totalSkillPointsEarned,
+        totalClicks: state.totalClicks,
+        lastPlayed: new Date().toISOString()
+      },
+      telegramId: telegramId,
+      isSynced: isCloudStorageSupported(),
+      lastBackup: null
+    };
+
+    persistUserProfile();
+    try{ localStorage.removeItem(EGYPT_REG_SKIPPED_KEY); }catch(e){}
+    onUserProfileReady();
+    showToast('📜 Добро пожаловать, ' + name + '! Свиток скреплён печатью.');
+  });
+
+  el.regSkipBtn.addEventListener('click', function(){
+    try{ localStorage.setItem(EGYPT_REG_SKIPPED_KEY, '1'); }catch(e){}
+    closeRegistration();
+  });
+
+  /* ---------- Manual .json backup: export / import ---------- */
+  el.regExportBtn.addEventListener('click', function(){
+    if(!userProfile){
+      showToast('⚠️ Сначала зарегистрируйся, затем можно скачать бэкап');
+      return;
+    }
+    userProfile.lastBackup = new Date().toISOString();
+    persistUserProfile();
+
+    const payload = JSON.stringify(userProfile, null, 2);
+    const blob = new Blob([payload], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'egypt_pharaoh_' + userProfile.username.replace(/[^a-zA-Zа-яА-Я0-9_-]/g, '_') + '.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showToast('💾 Резервная копия скачана на устройство');
+    showProfileSummary();
+  });
+
+  el.regImportBtn.addEventListener('click', function(){
+    el.regImportFileInput.click();
+  });
+
+  el.regImportFileInput.addEventListener('change', function(){
+    const file = el.regImportFileInput.files && el.regImportFileInput.files[0];
+    el.regImportFileInput.value = '';
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(){
+      try{
+        const imported = JSON.parse(String(reader.result));
+        if(!imported || typeof imported.username !== 'string' || !imported.gameStats){
+          throw new Error('Неверный формат файла');
+        }
+        userProfile = imported;
+        persistUserProfile();
+        try{ localStorage.removeItem(EGYPT_REG_SKIPPED_KEY); }catch(e){}
+        onUserProfileReady();
+        showToast('📂 Свиток восстановлен: ' + imported.username);
+      }catch(e){
+        showToast('⚠️ Не удалось прочитать файл бэкапа');
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  fillHieroglyphPattern(el.regHieroglyphPattern);
 
   /* ============ INIT ============ */
   load();
@@ -2234,6 +2767,7 @@
   render();
   updateAura();
   switchPage('clicker');
+  initUserProfile();
 })();
 </script>
 
