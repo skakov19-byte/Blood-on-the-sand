@@ -433,34 +433,6 @@
     border-color:var(--gold-bright);
   }
 
-  /* ---------- STATS PANEL ---------- */
-  #stats-panel{
-    position:fixed;
-    left:16px; bottom:88px;
-    z-index:20;
-    background:rgba(13,24,38,0.72);
-    border:2px solid var(--gold);
-    border-radius:12px;
-    padding:12px 16px;
-    font-family:'Cormorant Garamond', serif;
-    font-size:15px;
-    line-height:1.7;
-    color:#f5e6c8;
-    box-shadow:0 4px 18px rgba(0,0,0,0.5);
-    max-width:210px;
-  }
-  #stats-panel h3{
-    margin:0 0 6px;
-    font-family:'Cinzel', serif;
-    font-size:14px;
-    color:var(--gold-bright);
-    letter-spacing:1px;
-    border-bottom:1px solid rgba(212,165,116,0.4);
-    padding-bottom:4px;
-  }
-  #stats-panel .stat-row{ display:flex; justify-content:space-between; gap:14px; }
-  #stats-panel .stat-row span:last-child{ color:var(--gold-bright); font-weight:600; }
-
   /* ---------- BASE UPGRADES (now on the Skill Tree page) ---------- */
   #base-upgrades-panel{
     max-width:980px;
@@ -780,6 +752,106 @@
     color:#c9a8f5;
     text-shadow:0 0 6px rgba(200,160,245,0.8), 0 2px 2px rgba(0,0,0,0.8);
   }
+
+  /* ================================================================
+     ACHIEVEMENTS ("ДОСТИЖЕНИЯ")
+     ================================================================ */
+  #achievements-scroll-area{
+    position:fixed; top:78px; left:0; right:0; bottom:78px;
+    overflow-y:auto; overflow-x:hidden;
+    z-index:18;
+    padding:6px clamp(10px,3vw,40px) 20px;
+  }
+
+  #achievements-summary{
+    text-align:center;
+    max-width:280px; margin:0 auto 18px;
+    font-family:'Cinzel', serif;
+    font-size:14px;
+    color:var(--gold-bright);
+    background:rgba(13,24,38,0.7);
+    border:1.5px solid var(--gold);
+    border-radius:20px;
+    padding:8px 16px;
+  }
+
+  .ach-category{ max-width:980px; margin:0 auto 22px; }
+  .ach-category-title{
+    font-family:'Cinzel', serif;
+    font-size:14px;
+    font-weight:700;
+    letter-spacing:1px;
+    color:var(--gold-bright);
+    text-shadow:0 1px 3px rgba(0,0,0,0.8);
+    margin-bottom:10px;
+    padding-bottom:6px;
+    border-bottom:1px solid rgba(212,165,116,0.4);
+  }
+  .ach-grid{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:12px;
+  }
+  @media (max-width:640px){ .ach-grid{ grid-template-columns:1fr; } }
+
+  .ach-card{
+    display:flex; align-items:center; gap:12px;
+    background:linear-gradient(160deg, rgba(42,69,104,0.85), rgba(13,24,38,0.9));
+    border:2px solid rgba(212,165,116,0.35);
+    border-radius:12px;
+    padding:10px 12px;
+    transition:transform .15s ease, box-shadow .15s ease, border-color .2s ease;
+  }
+  .ach-card:hover{ transform:translateY(-2px); }
+  .ach-card.unlocked{
+    border-color:var(--gold-bright);
+    box-shadow:0 0 16px rgba(240,201,122,0.35), inset 0 0 16px rgba(240,201,122,0.08);
+  }
+  .ach-card.locked{ opacity:0.62; }
+
+  .ach-icon{
+    width:42px; height:42px; flex-shrink:0;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px;
+    background:radial-gradient(circle at 35% 30%, #F0C97A, #8B1A1A);
+    border:1.5px solid var(--gold);
+  }
+  .ach-card.locked .ach-icon{ filter:grayscale(0.6); }
+
+  .ach-body{ flex:1; min-width:0; }
+  .ach-name{
+    font-family:'Cinzel', serif;
+    font-size:13px;
+    font-weight:700;
+    color:var(--gold-bright);
+    line-height:1.25;
+  }
+  .ach-card.locked .ach-name{ color:#c9b89a; }
+  .ach-desc{ font-size:11.5px; color:#e6d6b8; opacity:.8; margin-top:2px; }
+
+  .ach-progress-bar{
+    height:6px;
+    background:rgba(0,0,0,0.4);
+    border-radius:4px;
+    overflow:hidden;
+    margin-top:6px;
+  }
+  .ach-progress-fill{
+    height:100%;
+    background:linear-gradient(90deg, var(--red), var(--orange), var(--gold-bright));
+  }
+  .ach-progress-text{ font-size:10px; color:var(--orange); margin-top:2px; font-weight:600; }
+
+  .ach-status{
+    font-size:18px;
+    flex-shrink:0;
+    width:24px;
+    text-align:center;
+  }
+  .ach-card.unlocked .ach-status{ text-shadow:0 0 8px rgba(240,201,122,0.8); }
+
+  @media (max-width:640px){ #achievements-scroll-area{ bottom:118px; } }
 
   /* ================================================================
      LEADERBOARD ("ТАБЛИЦА ФАРАОНОВ")
@@ -1332,11 +1404,9 @@
 
   /* While the tour is active, get panels that would otherwise collide with
      the docked dialogue box out of the way. */
-  body.tutorial-active #stats-panel{ display:none; }
   body.tutorial-active #perk-scroll-area{ bottom:210px; }
 
   @media (max-width:640px){
-    #stats-panel{ font-size:13px; padding:10px 12px; max-width:150px; bottom:118px; }
     .upgrade-btn .u-desc{ display:none; }
     #perk-scroll-area{ bottom:118px; }
     body.tutorial-active #perk-scroll-area{ bottom:230px; }
@@ -1396,16 +1466,7 @@
     </div>
   </div>
 
-  <div id="stats-panel">
-    <h3>𓋴 Stats 𓋴</h3>
-    <div class="stat-row"><span>Total Clicks</span><span id="stat-clicks">0</span></div>
-    <div class="stat-row"><span>Level</span><span id="stat-level">1</span></div>
-    <div class="stat-row"><span>XP Progress</span><span id="stat-xp">0 / 100</span></div>
-    <div class="stat-row"><span>Skill Points Earned</span><span id="stat-sp">0</span></div>
-    <div class="stat-row"><span>Click Power</span><span id="stat-power">1</span></div>
-    <div class="stat-row"><span>Свитки Тота</span><span id="stat-scrolls">0</span></div>
-    <div class="stat-row"><span>Золотые Иероглифы</span><span id="stat-hieroglyphs">0</span></div>
-  </div>
+
 </div>
 
 <div class="page" id="page-skills">
@@ -1457,6 +1518,12 @@
 
 <div class="page" id="page-achievements">
   <div class="page-title">𓋹 Достижения 𓋹</div>
+  <div id="achievements-scroll-area">
+    <div id="achievements-summary">
+      𓆓 Открыто: <span id="ach-unlocked-count">0</span> / <span id="ach-total-count">0</span>
+    </div>
+    <div id="achievements-list"></div>
+  </div>
 </div>
 
 <div id="levelup-banner">LEVEL UP!</div>
@@ -1723,6 +1790,13 @@
     scrollsOfThoth: 0,
     respecCount: 0,
     goldenHieroglyphs: 0,
+    prestigeCount: 0,
+    loginStreak: 0,
+    lastLoginDate: null,
+    hasCritted: false,
+    hasOpenedLeaderboard: false,
+    maxPassiveIncomeSeen: 0,
+    unlockedAchievements: {},
     perks: {
       crystal_lens: { level: 0 },
       khopesh:      { level: 0 },
@@ -1993,11 +2067,6 @@
     charWrap: document.getElementById('char-wrap'),
     charImg: document.getElementById('char-img'),
     charFallback: document.getElementById('char-fallback'),
-    statClicks: document.getElementById('stat-clicks'),
-    statLevel: document.getElementById('stat-level'),
-    statXp: document.getElementById('stat-xp'),
-    statSp: document.getElementById('stat-sp'),
-    statPower: document.getElementById('stat-power'),
     levelupBanner: document.getElementById('levelup-banner'),
     flashOverlay: document.getElementById('flash-overlay'),
     sandContainer: document.getElementById('sand-container'),
@@ -2011,8 +2080,9 @@
     powerCost: document.getElementById('power-cost'),
     autoCost: document.getElementById('auto-cost'),
     speedCost: document.getElementById('speed-cost'),
-    statScrolls: document.getElementById('stat-scrolls'),
-    statHieroglyphs: document.getElementById('stat-hieroglyphs'),
+    achievementsList: document.getElementById('achievements-list'),
+    achUnlockedCount: document.getElementById('ach-unlocked-count'),
+    achTotalCount: document.getElementById('ach-total-count'),
     perkGrid: document.getElementById('perk-grid'),
     perkSp: document.getElementById('perk-sp'),
     perkScrolls: document.getElementById('perk-scrolls'),
@@ -2106,14 +2176,6 @@
 
     el.spCount.textContent = state.skillPoints;
 
-    el.statClicks.textContent = state.totalClicks;
-    el.statLevel.textContent = state.level;
-    el.statXp.textContent = Math.floor(state.xp) + ' / ' + needed;
-    el.statSp.textContent = state.totalSkillPointsEarned;
-    el.statPower.textContent = Math.round(getManualClickPower() * 10) / 10;
-    el.statScrolls.textContent = state.scrollsOfThoth;
-    el.statHieroglyphs.textContent = state.goldenHieroglyphs;
-
     el.powerLvl.textContent = 'Lv.' + state.powerLvl;
     el.autoLvl.textContent = 'Lv.' + state.autoLvl;
     el.speedLvl.textContent = 'Lv.' + state.speedLvl;
@@ -2128,6 +2190,8 @@
     el.upgPower.disabled = state.skillPoints < powerCost;
     el.upgAuto.disabled = state.skillPoints < autoCost;
     el.upgSpeed.disabled = state.skillPoints < speedCost || xpNeeded(state.level) <= 20;
+
+    checkAchievements();
   }
 
   /* ============ FLOATING XP TEXT ============ */
@@ -2337,6 +2401,7 @@
     let isCrit = false;
     if(Math.random() < getCritChance()){
       isCrit = true;
+      state.hasCritted = true;
       amount *= getCritMultiplier();
       tags.push('💥 КРИТ');
     }
@@ -2552,6 +2617,7 @@
     const gained = computeGoldenHieroglyphs();
 
     state.goldenHieroglyphs += gained;
+    state.prestigeCount += 1;
     state.level = 1;
     state.xp = 0;
     state.skillPoints = 0;
@@ -2656,6 +2722,7 @@
       btn.classList.toggle('active', btn.dataset.page === name);
     });
     if(name === 'skills') renderPerks();
+    if(name === 'achievements') renderAchievements();
   }
 
   navButtons.forEach(function(btn){
@@ -2663,6 +2730,161 @@
   });
 
   el.skillpointBtn.addEventListener('click', function(){ switchPage('skills'); });
+
+  /* ============ ACHIEVEMENTS ("ДОСТИЖЕНИЯ") ============
+     Achievements are "sticky": once state.unlockedAchievements[id] is set,
+     it's never cleared again, even if the underlying stat later drops (e.g.
+     a respec zeroes out perk levels, or Prestige resets the level back to
+     1). checkAchievements() only ever adds to that set, never removes.
+  */
+  function updateLoginStreak(){
+    const todayStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    if(state.lastLoginDate === todayStr) return; // already counted today
+    if(state.lastLoginDate){
+      const prevDate = new Date(state.lastLoginDate + 'T00:00:00Z');
+      const curDate = new Date(todayStr + 'T00:00:00Z');
+      const diffDays = Math.round((curDate - prevDate) / 86400000);
+      state.loginStreak = (diffDays === 1) ? (state.loginStreak || 0) + 1 : 1;
+    } else {
+      state.loginStreak = 1;
+    }
+    state.lastLoginDate = todayStr;
+  }
+
+  function countPerksStarted(){
+    return Object.keys(state.perks).filter(function(k){ return state.perks[k].level >= 1; }).length;
+  }
+  function hasAnyPerkMaxed(){
+    return Object.keys(state.perks).some(function(k){
+      return k !== 'tomb_key' && state.perks[k].level >= 20;
+    });
+  }
+
+  const ACHIEVEMENTS = [
+    // ---- Кликовое мастерство ----
+    { id:'clicks_100', category:'clicks', icon:'𓂀', name:'Ученик Писца', desc:'Сделай 100 кликов', target:100, progress:function(){ return state.totalClicks; } },
+    { id:'clicks_500', category:'clicks', icon:'𓂀', name:'Хранитель Печати', desc:'Сделай 500 кликов', target:500, progress:function(){ return state.totalClicks; } },
+    { id:'clicks_1000', category:'clicks', icon:'𓂀', name:'Мастер Папируса', desc:'Сделай 1 000 кликов', target:1000, progress:function(){ return state.totalClicks; } },
+    { id:'clicks_5000', category:'clicks', icon:'𓂀', name:'Жрец Истины', desc:'Сделай 5 000 кликов', target:5000, progress:function(){ return state.totalClicks; } },
+    { id:'clicks_10000', category:'clicks', icon:'𓂀', name:'Верховный Дознаватель', desc:'Сделай 10 000 кликов', target:10000, progress:function(){ return state.totalClicks; } },
+    { id:'clicks_50000', category:'clicks', icon:'𓂀', name:'Тень Анубиса', desc:'Сделай 50 000 кликов', target:50000, progress:function(){ return state.totalClicks; } },
+    { id:'clicks_100000', category:'clicks', icon:'𓂀', name:'Живое Воплощение Тота', desc:'Сделай 100 000 кликов', target:100000, progress:function(){ return state.totalClicks; } },
+
+    // ---- Восхождение сыщика (уровень) ----
+    { id:'level_10', category:'level', icon:'𓋹', name:'Младший Дознаватель', desc:'Достигни 10 уровня', target:10, progress:function(){ return state.level; } },
+    { id:'level_25', category:'level', icon:'𓋹', name:'Опытный Сыщик', desc:'Достигни 25 уровня', target:25, progress:function(){ return state.level; } },
+    { id:'level_50', category:'level', icon:'𓋹', name:'Мастер Расследований', desc:'Достигни 50 уровня', target:50, progress:function(){ return state.level; } },
+    { id:'level_75', category:'level', icon:'𓋹', name:'Легенда Долины Царей', desc:'Достигни 75 уровня', target:75, progress:function(){ return state.level; } },
+    { id:'level_100', category:'level', icon:'𓋹', name:'Бессмертный Дознаватель Фараона', desc:'Достигни 100 уровня', target:100, progress:function(){ return state.level; } },
+
+    // ---- Верность Ра (дни подряд) ----
+    { id:'streak_3', category:'streak', icon:'☀️', name:'Первые Лучи Ра', desc:'Заходи в игру 3 дня подряд', target:3, progress:function(){ return state.loginStreak; } },
+    { id:'streak_7', category:'streak', icon:'☀️', name:'Неделя Сокола Гора', desc:'Заходи в игру 7 дней подряд', target:7, progress:function(){ return state.loginStreak; } },
+    { id:'streak_14', category:'streak', icon:'☀️', name:'Две Недели Верности Маат', desc:'Заходи в игру 14 дней подряд', target:14, progress:function(){ return state.loginStreak; } },
+    { id:'streak_30', category:'streak', icon:'☀️', name:'Лунный Круг Тота', desc:'Заходи в игру 30 дней подряд', target:30, progress:function(){ return state.loginStreak; } },
+    { id:'streak_60', category:'streak', icon:'☀️', name:'Сезон Верности Нилу', desc:'Заходи в игру 60 дней подряд', target:60, progress:function(){ return state.loginStreak; } },
+    { id:'streak_100', category:'streak', icon:'☀️', name:'Вечный Страж Времени', desc:'Заходи в игру 100 дней подряд', target:100, progress:function(){ return state.loginStreak; } },
+
+    // ---- Древо знаний (перки) ----
+    { id:'perk_first', category:'perks', icon:'🪶', name:'Первый Инструмент Сыщика', desc:'Купи первый уровень любого перка', check:function(){ return countPerksStarted() >= 1; } },
+    { id:'perk_all_started', category:'perks', icon:'🪶', name:'Мастер на Все Руки', desc:'Вложись во все 12 перков', target:12, progress:countPerksStarted },
+    { id:'perk_any_maxed', category:'perks', icon:'🪶', name:'Совершенство в Ремесле', desc:'Прокачай любой перк до 20 уровня', check:hasAnyPerkMaxed },
+    { id:'perk_lens_20', category:'perks', icon:'🔍', name:'Всевидящее Око Жреца', desc:'Прокачай Хрустальную лупу жреца до 20 уровня', target:20, progress:function(){ return state.perks.crystal_lens.level; } },
+    { id:'perk_tomb_key', category:'perks', icon:'🗝️', name:'Ключ от Дуата', desc:'Открой Ключ от Гробницы Истины', check:function(){ return state.perks.tomb_key.level >= 1; } },
+    { id:'prestige_first', category:'perks', icon:'𓅓', name:'Возрождённый из Песков', desc:'Соверши свой первый Престиж', check:function(){ return state.prestigeCount >= 1; } },
+
+    // ---- Базовые улучшения ----
+    { id:'upgrade_power', category:'upgrades', icon:'⚔️', name:'Твёрдая Рука', desc:'Купи первый уровень Click Power', check:function(){ return state.powerLvl >= 1; } },
+    { id:'upgrade_auto', category:'upgrades', icon:'⚙️', name:'Механический Помощник', desc:'Купи первый уровень Auto-Clicker', check:function(){ return state.autoLvl >= 1; } },
+    { id:'upgrade_speed', category:'upgrades', icon:'🐎', name:'Ветер в Спину', desc:'Купи первый уровень Speed Boost', check:function(){ return state.speedLvl >= 1; } },
+    { id:'passive_10', category:'upgrades', icon:'📈', name:'Поток Открытий', desc:'Разгони пассивный доход до 10 XP/сек', target:10, progress:function(){ return Math.floor(state.maxPassiveIncomeSeen); } },
+    { id:'passive_100', category:'upgrades', icon:'📈', name:'Империя Расследований', desc:'Разгони пассивный доход до 100 XP/сек', target:100, progress:function(){ return Math.floor(state.maxPassiveIncomeSeen); } },
+
+    // ---- Сокровища Египта ----
+    { id:'scroll_first', category:'economy', icon:'📜', name:'Хранитель Секретов Тота', desc:'Получи первый Свиток Тота', check:function(){ return state.scrollsOfThoth >= 1; } },
+    { id:'hieroglyph_first', category:'economy', icon:'𓆓', name:'Отблеск Вечности', desc:'Получи первый Золотой Иероглиф', check:function(){ return state.goldenHieroglyphs >= 1; } },
+    { id:'respec_first', category:'economy', icon:'🔄', name:'Второй Шанс', desc:'Соверши респек Дерева Навыков', check:function(){ return state.respecCount >= 1; } },
+    { id:'crit_first', category:'economy', icon:'💥', name:'Момент Озарения', desc:'Нанеси свой первый критический удар', check:function(){ return state.hasCritted === true; } },
+
+    // ---- Слава и признание ----
+    { id:'register_profile', category:'social', icon:'🏛️', name:'Свиток с Твоим Именем', desc:'Зарегистрируй Свиток Фараона', check:function(){ return !!userProfile; } },
+    { id:'leaderboard_open', category:'social', icon:'𓋹', name:'Взгляд на Соперников', desc:'Загляни в Таблицу Фараонов', check:function(){ return state.hasOpenedLeaderboard === true; } },
+  ];
+
+  const ACHIEVEMENT_CATEGORY_META = {
+    clicks:   { title:'𓂀 Кликовое Мастерство' },
+    level:    { title:'𓋹 Восхождение Сыщика' },
+    streak:   { title:'☀️ Верность Ра' },
+    perks:    { title:'🪶 Древо Знаний' },
+    upgrades: { title:'⚙️ Базовые Улучшения' },
+    economy:  { title:'📜 Сокровища Египта' },
+    social:   { title:'🏛️ Слава и Признание' }
+  };
+  const ACHIEVEMENT_CATEGORY_ORDER = ['clicks', 'level', 'streak', 'perks', 'upgrades', 'economy', 'social'];
+
+  function isAchievementUnlocked(ach){
+    if(state.unlockedAchievements[ach.id]) return true;
+    return ach.check ? ach.check() : (ach.progress() >= ach.target);
+  }
+
+  function checkAchievements(){
+    state.maxPassiveIncomeSeen = Math.max(state.maxPassiveIncomeSeen || 0, getPassiveIncomePerSecond());
+
+    const newlyUnlocked = [];
+    ACHIEVEMENTS.forEach(function(ach){
+      if(state.unlockedAchievements[ach.id]) return;
+      if(isAchievementUnlocked(ach)){
+        state.unlockedAchievements[ach.id] = true;
+        newlyUnlocked.push(ach);
+      }
+    });
+
+    if(newlyUnlocked.length){
+      newlyUnlocked.forEach(function(ach){
+        showToast('🏆 Достижение: ' + ach.name);
+      });
+      save();
+      if(document.getElementById('page-achievements').classList.contains('active')){
+        renderAchievements();
+      }
+    }
+  }
+
+  function buildAchievementCardHTML(ach){
+    const unlocked = isAchievementUnlocked(ach);
+    let progressHtml = '';
+    if(ach.progress){
+      const current = Math.min(ach.target, ach.progress());
+      const pct = Math.max(0, Math.min(100, (current / ach.target) * 100));
+      progressHtml = '<div class="ach-progress-bar"><div class="ach-progress-fill" style="width:' + pct + '%"></div></div>'
+        + '<div class="ach-progress-text">' + current + ' / ' + ach.target + '</div>';
+    }
+    return ''
+      + '<div class="ach-card ' + (unlocked ? 'unlocked' : 'locked') + '">'
+      + '<div class="ach-icon">' + ach.icon + '</div>'
+      + '<div class="ach-body">'
+        + '<div class="ach-name">' + ach.name + '</div>'
+        + '<div class="ach-desc">' + ach.desc + '</div>'
+        + progressHtml
+      + '</div>'
+      + '<div class="ach-status">' + (unlocked ? '✅' : '🔒') + '</div>'
+      + '</div>';
+  }
+
+  function renderAchievements(){
+    const unlockedCount = ACHIEVEMENTS.filter(isAchievementUnlocked).length;
+    el.achUnlockedCount.textContent = unlockedCount;
+    el.achTotalCount.textContent = ACHIEVEMENTS.length;
+
+    el.achievementsList.innerHTML = ACHIEVEMENT_CATEGORY_ORDER.map(function(cat){
+      const items = ACHIEVEMENTS.filter(function(a){ return a.category === cat; });
+      if(!items.length) return '';
+      return '<div class="ach-category">'
+        + '<div class="ach-category-title">' + ACHIEVEMENT_CATEGORY_META[cat].title + '</div>'
+        + '<div class="ach-grid">' + items.map(buildAchievementCardHTML).join('') + '</div>'
+        + '</div>';
+    }).join('');
+  }
 
   /* ============ LEADERBOARD ("ТАБЛИЦА ФАРАОНОВ") ============ */
   const LEADERBOARD_CLOUD_KEY = 'leaderboard_entry';
@@ -2794,6 +3016,7 @@
   }
 
   function openLeaderboard(){
+    state.hasOpenedLeaderboard = true;
     saveLeaderboardEntryToCloud();
     el.leaderboardRows.innerHTML = '<div class="lb-loading">𓋹 Загружаем рейтинг фараонов...</div>';
     renderLeaderboard();
@@ -3230,6 +3453,7 @@
 
   /* ============ INIT ============ */
   load();
+  updateLoginStreak();
   const offlinePassiveGain = applyOfflinePassiveIncome();
   if(offlinePassiveGain >= 1){
     showToast('💤 Пока вас не было, пассивный доход принёс +' + Math.floor(offlinePassiveGain) + ' XP');
