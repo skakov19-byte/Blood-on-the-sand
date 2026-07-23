@@ -27,6 +27,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,500&display=swap" rel="stylesheet">
+<!-- Telegram Mini App SDK. Safe to load even outside Telegram: window.Telegram
+     simply stays undefined and every call site below falls back gracefully. -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   :root{
     --gold:#D4A574;
@@ -778,6 +781,273 @@
     text-shadow:0 0 6px rgba(200,160,245,0.8), 0 2px 2px rgba(0,0,0,0.8);
   }
 
+  /* ================================================================
+     LEADERBOARD ("ТАБЛИЦА ФАРАОНОВ")
+     ================================================================ */
+
+  /* ---------- Cartouche launcher button ---------- */
+  #leaderboard-btn{
+    position:fixed; top:18px; right:14px; z-index:25;
+    display:flex; align-items:center; justify-content:center;
+    gap:5px;
+    padding:9px 16px 13px;
+    font-family:'Cinzel', serif;
+    font-weight:700;
+    font-size:10.5px;
+    letter-spacing:1px;
+    color:#3a1f0a;
+    background:
+      radial-gradient(circle at 30% 22%, rgba(255,255,255,0.35), rgba(255,255,255,0) 42%),
+      repeating-linear-gradient(135deg, rgba(166,107,50,0.12) 0 2px, transparent 2px 5px),
+      linear-gradient(160deg, #FFD700, #D4A574 55%, #A66B32);
+    border:3px solid #A66B32;
+    border-radius:50px;
+    box-shadow:
+      0 0 0 2px #1A0F0A inset,
+      0 4px 10px rgba(0,0,0,0.5),
+      0 0 16px rgba(255,215,0,0.45);
+    cursor:pointer;
+    text-shadow:0 1px 1px rgba(255,255,255,0.35);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  #leaderboard-btn::after{
+    content:'';
+    position:absolute;
+    bottom:5px; left:50%; transform:translateX(-50%);
+    width:56%; height:3px;
+    background:#1A0F0A;
+    border-radius:2px;
+  }
+  #leaderboard-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 0 0 2px #1A0F0A inset, 0 6px 16px rgba(0,0,0,0.55), 0 0 22px rgba(255,215,0,0.65);
+  }
+  #leaderboard-btn:active{ transform:translateY(0) scale(0.96); }
+
+  /* ---------- Modal overlay ---------- */
+  #leaderboard-overlay{
+    position:fixed; inset:0;
+    z-index:100;
+    display:none;
+    align-items:center; justify-content:center;
+    padding:18px;
+    background:rgba(10,6,3,0.72);
+    backdrop-filter:blur(2px);
+  }
+  #leaderboard-overlay.open{ display:flex; }
+
+  #leaderboard-card{
+    position:relative;
+    width:min(560px, 100%);
+    max-height:min(720px, 88vh);
+    display:flex; flex-direction:column;
+    overflow:hidden;
+    border-radius:18px;
+    border:4px solid #FFD700;
+    box-shadow:0 0 0 3px #A66B32, 0 0 40px rgba(255,215,0,0.35), 0 20px 50px rgba(0,0,0,0.6);
+    background:
+      linear-gradient(180deg, rgba(26,15,10,0.2), rgba(26,15,10,0.5)),
+      linear-gradient(160deg, #D4A574 0%, #C79462 45%, #A66B32 100%);
+    animation:lbCardIn .35s cubic-bezier(.2,1.4,.4,1);
+  }
+  @keyframes lbCardIn{
+    0%{ opacity:0; transform:scale(0.85) translateY(20px); }
+    100%{ opacity:1; transform:scale(1) translateY(0); }
+  }
+
+  #leaderboard-card::before{ /* hieroglyphic repeating background pattern */
+    content:'';
+    position:absolute; inset:0;
+    z-index:0;
+    opacity:0.5;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(26,15,10,0.05) 0 1px, transparent 1px 26px),
+      repeating-linear-gradient(90deg, rgba(26,15,10,0.05) 0 1px, transparent 1px 26px);
+  }
+  #hieroglyph-pattern{
+    position:absolute; inset:0;
+    z-index:0;
+    overflow:hidden;
+    pointer-events:none;
+  }
+  #hieroglyph-pattern span{
+    position:absolute;
+    font-size:22px;
+    color:rgba(26,15,10,0.14);
+  }
+
+  /* corner cartouche ornaments */
+  .lb-corner{
+    position:absolute;
+    z-index:2;
+    font-size:20px;
+    color:#FFD700;
+    text-shadow:0 0 6px rgba(255,215,0,0.7), 0 1px 2px rgba(0,0,0,0.8);
+    pointer-events:none;
+  }
+  .lb-corner.tl{ top:8px; left:10px; }
+  .lb-corner.tr{ top:8px; right:10px; }
+  .lb-corner.bl{ bottom:8px; left:10px; }
+  .lb-corner.br{ bottom:8px; right:10px; }
+
+  #leaderboard-close{
+    position:absolute; top:10px; right:10px; z-index:5;
+    width:34px; height:34px;
+    border-radius:50%;
+    border:2px solid #1A0F0A;
+    background:radial-gradient(circle at 35% 30%, #FFD700, #A66B32 75%);
+    color:#1A0F0A;
+    font-size:17px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    box-shadow:0 3px 8px rgba(0,0,0,0.5);
+    transition:transform .15s ease;
+  }
+  #leaderboard-close:hover{ transform:rotate(15deg) scale(1.08); }
+  #leaderboard-close:active{ transform:rotate(0deg) scale(0.94); }
+
+  #leaderboard-header{
+    position:relative; z-index:2;
+    text-align:center;
+    padding:20px 44px 12px;
+    flex-shrink:0;
+  }
+  #leaderboard-header h2{
+    margin:0;
+    font-family:'Cinzel', serif;
+    font-weight:800;
+    font-size:clamp(16px,3.6vw,22px);
+    letter-spacing:1.5px;
+    color:#3a1f0a;
+    text-shadow:0 1px 0 rgba(255,255,255,0.4), 0 2px 4px rgba(0,0,0,0.25);
+  }
+  #leaderboard-header .lb-subtitle{
+    margin-top:4px;
+    font-size:12px;
+    color:#5a3a1a;
+    letter-spacing:.5px;
+  }
+
+  #leaderboard-body{
+    position:relative; z-index:2;
+    overflow-y:auto;
+    padding:4px 16px 16px;
+    flex:1;
+  }
+
+  #leaderboard-table{
+    border:2px solid #1A0F0A;
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow:0 2px 10px rgba(0,0,0,0.25);
+  }
+  .lb-header-row, .lb-row{
+    display:grid;
+    grid-template-columns:64px 1fr 74px;
+    align-items:center;
+  }
+  .lb-header-row{
+    background:linear-gradient(180deg, #1A0F0A, #2a180f);
+    color:#FFD700;
+    font-family:'Cinzel', serif;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:1.5px;
+    padding:8px 10px;
+    text-align:center;
+  }
+  .lb-header-row span:first-child, .lb-header-row span:last-child{ text-align:center; }
+  .lb-header-row span:nth-child(2){ text-align:left; padding-left:6px; }
+
+  .lb-row{
+    padding:8px 10px;
+    font-family:'Cormorant Garamond', serif;
+    font-size:14.5px;
+    font-weight:600;
+    color:#2a1608;
+    border-top:1px solid rgba(26,15,10,0.15);
+  }
+  .lb-row.sand{ background:rgba(212,165,116,0.55); }
+  .lb-row.terracotta{ background:rgba(166,107,50,0.4); }
+
+  .lb-rank{ text-align:center; font-size:16px; }
+  .lb-rank-num{ font-size:11px; opacity:.75; margin-left:2px; }
+  .lb-name{ padding-left:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .lb-level{ text-align:center; font-family:'Cinzel', serif; font-weight:700; }
+
+  .lb-row.top1{ background:linear-gradient(90deg, rgba(255,215,0,0.55), rgba(255,215,0,0.25)); box-shadow:inset 0 0 14px rgba(255,215,0,0.5); }
+  .lb-row.top2{ background:linear-gradient(90deg, rgba(200,200,210,0.5), rgba(200,200,210,0.2)); }
+  .lb-row.top3{ background:linear-gradient(90deg, rgba(205,140,90,0.5), rgba(205,140,90,0.2)); }
+
+  .lb-row.current-player{
+    position:relative;
+    background:linear-gradient(90deg, rgba(255,215,0,0.75), rgba(255,180,60,0.4));
+    box-shadow:inset 0 0 0 2px #FFD700, 0 0 14px rgba(255,215,0,0.6);
+    color:#1A0F0A;
+  }
+  .lb-row.current-player .lb-name::after{
+    content:' 𓋴 (Вы)';
+    font-size:11px;
+    opacity:.8;
+  }
+
+  #leaderboard-footer{
+    position:relative; z-index:2;
+    flex-shrink:0;
+    padding:12px 16px 18px;
+    text-align:center;
+  }
+  #leaderboard-refresh{
+    font-family:'Cinzel', serif;
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:.5px;
+    color:#3a1f0a;
+    background:radial-gradient(circle at 35% 30%, #FFE9B0, #FFD700 55%, #A66B32 100%);
+    border:2px solid #1A0F0A;
+    border-radius:24px;
+    padding:9px 22px;
+    cursor:pointer;
+    box-shadow:0 4px 12px rgba(0,0,0,0.35);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  #leaderboard-refresh:hover{ transform:translateY(-2px); box-shadow:0 6px 16px rgba(0,0,0,0.4); }
+  #leaderboard-refresh:active .ra-disk{ animation:raSpin .6s linear; }
+  #leaderboard-refresh .ra-disk{ display:inline-block; }
+  @keyframes raSpin{ to{ transform:rotate(360deg); } }
+
+  /* sand burst on open */
+  .lb-sand-particle{
+    position:absolute; top:-10px;
+    border-radius:50%;
+    background:#FFD700;
+    opacity:.75;
+    pointer-events:none;
+    animation-name:lbSandFall;
+    animation-timing-function:ease-in;
+    animation-iteration-count:1;
+    z-index:3;
+  }
+  @keyframes lbSandFall{
+    0%{ transform:translateY(-10px) translateX(0); opacity:0; }
+    15%{ opacity:.85; }
+    100%{ transform:translateY(320px) translateX(18px); opacity:0; }
+  }
+
+  /* ---------- Telegram light theme adjustments ---------- */
+  :root[data-tg-scheme="light"] #leaderboard-overlay{ background:rgba(60,45,30,0.55); }
+  :root[data-tg-scheme="light"] #leaderboard-card{
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05)),
+      linear-gradient(160deg, #E9C896 0%, #D4A574 45%, #A66B32 100%);
+  }
+
+  @media (max-width:520px){
+    #leaderboard-btn{ font-size:9.5px; padding:8px 12px 12px; top:12px; right:10px; }
+    .lb-header-row, .lb-row{ grid-template-columns:48px 1fr 60px; font-size:13px; }
+    #leaderboard-header h2{ font-size:15px; }
+  }
+
   @media (max-width:640px){
     #stats-panel{ font-size:13px; padding:10px 12px; max-width:150px; bottom:118px; }
     .upgrade-btn .u-desc{ display:none; }
@@ -899,6 +1169,39 @@
 <div id="perk-rank-banner"></div>
 <div id="toast-stack"></div>
 
+<button id="leaderboard-btn" type="button">𓋹 РЕЙТИНГ</button>
+
+<div id="leaderboard-overlay">
+  <div id="leaderboard-card">
+    <div id="hieroglyph-pattern"></div>
+    <span class="lb-corner tl">𓊪</span>
+    <span class="lb-corner tr">𓊪</span>
+    <span class="lb-corner bl">𓊪</span>
+    <span class="lb-corner br">𓊪</span>
+    <button id="leaderboard-close" type="button" aria-label="Закрыть">𓆣</button>
+
+    <div id="leaderboard-header">
+      <h2>📜 ТАБЛИЦА ФАРАОНОВ 📜</h2>
+      <div class="lb-subtitle">Величайшие сыщики Египта</div>
+    </div>
+
+    <div id="leaderboard-body">
+      <div id="leaderboard-table">
+        <div class="lb-header-row">
+          <span>МЕСТО</span>
+          <span>ИМЯ</span>
+          <span>УРОВЕНЬ</span>
+        </div>
+        <div id="leaderboard-rows"></div>
+      </div>
+    </div>
+
+    <div id="leaderboard-footer">
+      <button id="leaderboard-refresh" type="button"><span class="ra-disk">🌞</span> Обновить</button>
+    </div>
+  </div>
+</div>
+
 <nav id="bottom-nav">
   <button class="nav-btn active" data-page="clicker">Прокачка персонажа</button>
   <button class="nav-btn" data-page="skills">Дерево навыков</button>
@@ -910,6 +1213,31 @@
 <script>
 (function(){
   'use strict';
+
+  /* ============ TELEGRAM MINI APP INTEGRATION ============
+     All of this degrades gracefully to plain-browser behaviour when the page
+     isn't actually running inside Telegram (window.Telegram stays undefined).
+  */
+  const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
+
+  function applyTelegramTheme(){
+    if(!tg) return;
+    document.documentElement.setAttribute('data-tg-scheme', tg.colorScheme || 'dark');
+  }
+
+  if(tg){
+    try{ tg.ready(); tg.expand(); }catch(e){ /* ignore outside a real Telegram client */ }
+    applyTelegramTheme();
+    try{ tg.onEvent('themeChanged', applyTelegramTheme); }catch(e){}
+  }
+
+  function getTelegramPlayerName(){
+    try{
+      const user = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+      if(user) return user.username ? '@' + user.username : (user.first_name || 'Игрок');
+    }catch(e){}
+    return 'Игрок';
+  }
 
   /* ============ STATE ============ */
   const SAVE_KEY = 'egyptClickerSave_v1';
@@ -1054,7 +1382,7 @@
     return 100 + (level - 1) * 10;
   }
 
-  const ENERGY_REGEN_MS = 10000;
+  const ENERGY_REGEN_MS = 20000;
 
   /* ============ PERK EFFECT CALCULATIONS ============ */
   function getArtifactsFound(){ return Math.floor(state.totalClicks / 100); }
@@ -1160,6 +1488,13 @@
     btnPrestige: document.getElementById('btn-prestige'),
     perkRankBanner: document.getElementById('perk-rank-banner'),
     toastStack: document.getElementById('toast-stack'),
+    leaderboardBtn: document.getElementById('leaderboard-btn'),
+    leaderboardOverlay: document.getElementById('leaderboard-overlay'),
+    leaderboardCard: document.getElementById('leaderboard-card'),
+    leaderboardClose: document.getElementById('leaderboard-close'),
+    leaderboardRows: document.getElementById('leaderboard-rows'),
+    leaderboardRefresh: document.getElementById('leaderboard-refresh'),
+    hieroglyphPattern: document.getElementById('hieroglyph-pattern'),
   };
 
   /* ============ IMAGE FALLBACK HANDLING ============ */
@@ -1362,6 +1697,8 @@
       }
       needed = xpNeeded(state.level);
     }
+
+    if(leveledUp) saveLeaderboardEntryToCloud();
 
     if(leveledUp){
       celebrateLevelUp();
@@ -1736,6 +2073,124 @@
   });
 
   el.skillpointBtn.addEventListener('click', function(){ switchPage('skills'); });
+
+  /* ============ LEADERBOARD ("ТАБЛИЦА ФАРАОНОВ") ============ */
+  const LEADERBOARD_CLOUD_KEY = 'leaderboard_entry';
+  const LEADERBOARD_FALLBACK_KEY = 'egyptClickerLeaderboardEntry_v1';
+
+  const FAKE_PHARAOH_NAMES = [
+    'Ramses','Cleopatra','Tutankhamun','Nefertiti','Anubis','Osiris','Horus',
+    'Isis','Seth','Bastet','Thoth','Ptah','Sekhmet','Hatshepsut','Akhenaten'
+  ];
+  const EGYPTIAN_RANK_GLYPHS = ['𓏤','𓏥','𓏦','𓏧','𓏨'];
+
+  let fakeLeaderboard = generateFakePharaohs();
+
+  function generateFakePharaohs(){
+    return FAKE_PHARAOH_NAMES.map(function(name){
+      return { name: name, level: 1 + Math.floor(Math.random() * 99) };
+    });
+  }
+
+  /* CloudStorage needs Bot API 6.9+; outside Telegram (or on an older client)
+     we fall back to localStorage so the "current player" row still works. */
+  function isCloudStorageSupported(){
+    return !!(tg && tg.CloudStorage && (!tg.isVersionAtLeast || tg.isVersionAtLeast('6.9')));
+  }
+
+  function saveLeaderboardEntryToCloud(){
+    const entry = { name: getTelegramPlayerName(), level: state.level };
+    const json = JSON.stringify(entry);
+    if(isCloudStorageSupported()){
+      try{ tg.CloudStorage.setItem(LEADERBOARD_CLOUD_KEY, json); }
+      catch(e){ try{ localStorage.setItem(LEADERBOARD_FALLBACK_KEY, json); }catch(e2){} }
+    } else {
+      try{ localStorage.setItem(LEADERBOARD_FALLBACK_KEY, json); }catch(e){}
+    }
+  }
+
+  function buildLeaderboardRowHTML(entry, rank, isCurrentPlayer){
+    const rowClass = ['lb-row', (rank % 2 === 0 ? 'terracotta' : 'sand')];
+    if(rank === 1) rowClass.push('top1');
+    else if(rank === 2) rowClass.push('top2');
+    else if(rank === 3) rowClass.push('top3');
+    if(isCurrentPlayer) rowClass.push('current-player');
+
+    let rankHtml;
+    if(rank === 1) rankHtml = '👑';
+    else if(rank === 2) rankHtml = '🥈';
+    else if(rank === 3) rankHtml = '🥉';
+    else rankHtml = EGYPTIAN_RANK_GLYPHS[rank % EGYPTIAN_RANK_GLYPHS.length] + '<span class="lb-rank-num">' + rank + '</span>';
+
+    return ''
+      + '<div class="' + rowClass.join(' ') + '">'
+      + '<span class="lb-rank">' + rankHtml + '</span>'
+      + '<span class="lb-name">' + entry.name + '</span>'
+      + '<span class="lb-level">' + entry.level + '</span>'
+      + '</div>';
+  }
+
+  function renderLeaderboard(){
+    const playerEntry = { name: getTelegramPlayerName(), level: state.level, isPlayer: true };
+    const combined = fakeLeaderboard.concat([playerEntry]).sort(function(a, b){ return b.level - a.level; });
+
+    el.leaderboardRows.innerHTML = combined.map(function(entry, i){
+      return buildLeaderboardRowHTML(entry, i + 1, !!entry.isPlayer);
+    }).join('');
+  }
+
+  function spawnHieroglyphPattern(){
+    const symbols = ['☥','𓆣','𓂀','𓋹','𓅓'];
+    let html = '';
+    for(let row = 0; row < 7; row++){
+      for(let col = 0; col < 6; col++){
+        const sym = symbols[(row + col) % symbols.length];
+        html += '<span style="left:' + (col * 18 + (row % 2) * 9) + '%; top:' + (row * 15) + '%;">' + sym + '</span>';
+      }
+    }
+    el.hieroglyphPattern.innerHTML = html;
+  }
+
+  function spawnSandBurst(){
+    const cardWidth = el.leaderboardCard.clientWidth || 400;
+    for(let i = 0; i < 26; i++){
+      const p = document.createElement('div');
+      p.className = 'lb-sand-particle';
+      const size = (2 + Math.random() * 3).toFixed(1) + 'px';
+      p.style.width = size;
+      p.style.height = size;
+      p.style.left = (Math.random() * cardWidth) + 'px';
+      p.style.animationDuration = (0.8 + Math.random() * 0.7) + 's';
+      p.style.animationDelay = (Math.random() * 0.3) + 's';
+      el.leaderboardCard.appendChild(p);
+      setTimeout(function(){ p.remove(); }, 2000);
+    }
+  }
+
+  function openLeaderboard(){
+    saveLeaderboardEntryToCloud();
+    renderLeaderboard();
+    el.leaderboardOverlay.classList.add('open');
+    spawnSandBurst();
+  }
+
+  function closeLeaderboard(){
+    el.leaderboardOverlay.classList.remove('open');
+  }
+
+  el.leaderboardBtn.addEventListener('click', openLeaderboard);
+  el.leaderboardClose.addEventListener('click', closeLeaderboard);
+  el.leaderboardOverlay.addEventListener('click', function(e){
+    if(e.target === el.leaderboardOverlay) closeLeaderboard();
+  });
+  el.leaderboardRefresh.addEventListener('click', function(){
+    fakeLeaderboard = generateFakePharaohs();
+    renderLeaderboard();
+    spawnSandBurst();
+    showToast('🌞 Таблица обновлена жрецами Ра');
+  });
+
+  spawnHieroglyphPattern();
 
   /* ============ INIT ============ */
   load();
